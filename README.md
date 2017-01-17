@@ -3,4 +3,5 @@ An extremely crude, lightweight Web Frontend for Suricata/Bro to be used with Br
 <br>
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png">
 <br>
-<b>Video Teaser:</b> https://youtu.be/vzZACYVJA3Y
+Coming soon!  Making minor coding adjustments and aesthetic improvements here and there, but it is almost ready for uploading to github<br>
+<b>In the meantime, here's a Video Teaser:</b> https://youtu.be/vzZACYVJA3Y
