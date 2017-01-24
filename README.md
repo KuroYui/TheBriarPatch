@@ -1,5 +1,5 @@
 # TheBriarPatch
-<center>Beta version has been upload!</center> 
+<center>Beta version has been uploaded!</center> 
 There is much work to be done, but here is the first fruits of TheBriarPatch for your exploration.  I hope it proves to be helpful
 <br>
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
