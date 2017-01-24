@@ -11,8 +11,7 @@ As of right now, I have Windows, Apple(iphone only), Linux [Pi (armv7l), ubuntu/
 Good question.  This will take your suricata http traffic and compare with Bro's intel logs to determine if any of the sites visited were marked as malicious in the Bro Intel feed.  Keep in mind you will need to get some malware feeds pulled into your Intel feed from critical-stack.  I have that info on the BriarIDS wiki.<br>
 Once the malicious scanning option is enabled, you will notice a new column added into the displayed results.  Also keep in mind that if this option is enabled, it can take some time to compare all traffic to bro's intel log but it is a nice reliable way of discovering malicious traffic in a LIVE setting.<br>
 <b>3. If I enabled auto-refresh and malicious scanning in the install script, how can I disable them?</b><br>
-easy.  do this: <b>sudo nano maliciousscanning</b> and change the '1' to a '0'.  Do the same for the <b>'refreshornot'</b> file.
+easy.  do this: <b>sudo nano maliciousscanning</b> and change the '1' to a '0'.  Do the same for the <b>'refreshornot'</b> file.<br>
 <b>4. How about archiving logs?</b><br>
-This is something I am also currently working on.  Right now TheBriarPatch is more a LIVE logging solution.  It will pull in logs that are currently in the suricata logs directory,http.log, even if suricata isn't running.  That is really the only "archiving" feature enabled right now.
-<br>
+This is something I am also currently working on.  Right now TheBriarPatch is more a LIVE logging solution.  It will pull in logs that are currently in the suricata logs directory,http.log, even if suricata isn't running.  That is really the only "archiving" feature enabled right now.<br>
 
