@@ -18,6 +18,10 @@ Default username: <b>BriarPatch</b> and password: <b>BriarPatch</b><br>
 </form>
 </center>
 <?php
+echo "<br><center><b style='background:orange'>";
+$updatecheck=shell_exec("sudo ./update.sh");
+echo $updatecheck;
+echo "</center></b>";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {

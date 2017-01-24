@@ -61,12 +61,13 @@ sudo chown www-data:www-data WindowsTraffic.txt
 sudo chown www-data:www-data maliciousscanner
 sudo chown www-data:www-data suriretention.sh
 sudo chown www-data:www-data broretention.sh
-
+sudo chown www-data:www-data update.sh
 clear
 
 echo "granting access to www-data apache user to purge old suricata and bro logs"
-sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/suriretention.sh' /etc/sudoers
-sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/broretention.sh' /etc/sudoers
+sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/suriretention.sh' /etc/sudoers
+sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/broretention.sh' /etc/sudoers
+sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/update.sh' /etc/sudoers
 
 #install/configure apache ssl cert
 echo "Creating certificate(s).  Recommend change defaults especially the Internet Widgets as that will trigger an annoying IDS alert from suricata"
