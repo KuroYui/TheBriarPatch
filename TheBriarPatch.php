@@ -331,9 +331,9 @@ for ($f=0;$f<$inteldirscount;$f++)
 {
 //for debugging purposes only
 //****************************************
-echo "<br>";
-echo "searching: ".$brodirs[$d]."<br>";
-echo "scanning: ".$inteldirs[$f]."<br>";
+//echo "<br>";
+//echo "searching: ".$brodirs[$d]."<br>";
+//echo "scanning: ".$inteldirs[$f]."<br>";
 //****************************************
 
 //make sure we aren't scanning our own local ip!
