@@ -124,7 +124,7 @@ if ($ExploitAttempts != "")
 {
 echo "<td><img src='images/bug.png' onClick='exploitsubmitter()' class='img1' width=75 height=75>"."<br><center>Exploit Attempts</center></td>";
 }
-if ($ExploitAttempts == "" && $iPhone == "" && $LinuxOS == "" && $WindowsOS == "")
+if ($ExploitAttempts == "" && $iPhone == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == "")
 {
 echo "<b style='background:orange'>Doesn't look like you have any packets collected from Suricata for analysis yet...</b>";
 }
