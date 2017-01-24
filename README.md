@@ -1,7 +1,8 @@
 # TheBriarPatch
-<center>Coming soon!</center> 
-An extremely crude, lightweight Web Frontend for Suricata/Bro to be used with BriarIDS
+<center>Beta version has been uploaded!</center> 
+There is much work to be done, but here is the first fruits of TheBriarPatch for your exploration.  I hope it proves to be helpful
 <br>
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
- It is almost ready for uploading to github ;)<br>
-<b>In the meantime, here's a Video Teaser:</b> https://youtu.be/vzZACYVJA3Y
+<b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
+<br>
+I am creating and adding to the WIKI even as I type this.  Stay tuned in for many updates to the WIKI and this github repo!
