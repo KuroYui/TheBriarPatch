@@ -180,6 +180,7 @@ $sourceip = shell_exec("awk '{print $(NF-2)}' iPhoneTraffic.txt");
 $remoteip = shell_exec("awk '{print $(NF)}' iPhoneTraffic.txt");
 
 $single_urls=explode(PHP_EOL,$theurl);
+$single_urls=array_unique($single_urls, SORT_REGULAR);
 //$device=explode(PHP_EOL,$devicetype);
 $thedate=explode(PHP_EOL,$thedate);
 //$theos=explode(PHP_EOL,$deviceos);
@@ -190,9 +191,9 @@ $eachip2=explode(PHP_EOL,$remoteip);
 $counturls = count($single_urls);
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
 
 $brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
 $brodirs=trim($brodirs);
@@ -206,12 +207,15 @@ $brodirscount=count($brodirs);
 //$inteldirscount=count($inteldirs);
 //$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
 //echo $malicious;
-
+$countme=1;
 for ($a=0; $a<$counturls-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/iphone' width=30 height=30>iPhone</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-
+if (!empty($single_urls[$a]))
+{
+echo "<tr align=left><td>$countme</td><td>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}
 if ($maliciousscanner==1)
 {
 
@@ -284,6 +288,7 @@ $remoteip = shell_exec("awk '{print $(NF)}' WindowsTraffic.txt");
 
 $thedate=explode(PHP_EOL,$thedate);
 $single_urls=explode(PHP_EOL,$theurl);
+$single_urls=array_unique($single_urls, SORT_REGULAR);
 //$device=explode(PHP_EOL,$devicetype);
 //$theos=explode(PHP_EOL,$deviceos);
 $eachip=explode(PHP_EOL,$sourceip);
@@ -291,11 +296,12 @@ $eachip2=explode(PHP_EOL,$remoteip);
 //$urlscount=count($single_urls);
 //$devicecount=count($device);
 $datecount=count($thedate);
+//$counturls = count($single_urls);
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
 
 
 
@@ -310,12 +316,15 @@ $brodirscount=count($brodirs);
 //$inteldirscount=count($inteldirs);
 //$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
 //echo $malicious;
-
+$countme=1;
 for ($a=0; $a<$datecount-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/windowscomputer' width=30 height=30>Windows OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/windowscomputer' width=30 height=30>Windows OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}
 if ($maliciousscanner==1)
 {
 
@@ -512,6 +521,7 @@ $remoteip = shell_exec("awk '{print $(NF)}' LinuxTraffic.txt");
 $devicefinder=explode(PHP_EOL,$devicefinder);
 $thedate=explode(PHP_EOL,$thedate);
 $single_urls=explode(PHP_EOL,$theurl);
+$single_urls=array_unique($single_urls, SORT_REGULAR);
 //$device=explode(PHP_EOL,$devicetype);
 //$theos=explode(PHP_EOL,$deviceos);
 $eachip=explode(PHP_EOL,$sourceip);
@@ -522,9 +532,9 @@ $countdate=count($thedate);
 
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
+echo "<table cellpadding=10><tr align=left><th>Count</th><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
 
 $brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
 $brodirs=trim($brodirs);
@@ -538,36 +548,51 @@ $brodirscount=count($brodirs);
 //$inteldirscount=count($inteldirs);
 //$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
 //echo $malicious;
-
+$countme=1;
 for ($a=0; $a<$countdate-1; $a++)
 {
 //echo $devicefinder[$a]."<br>";
 if (preg_match('/armv7l/',$devicefinder[$a])) //raspberry pi image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-}
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}}
 else if (preg_match('/Android/',$devicefinder[$a])) //android image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/android.png' width=30 height=30>Android SmartPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-}
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/android.png' width=30 height=30>Android SmartPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}}
 else if (preg_match('/Tizen/',$devicefinder[$a])) //smart tv
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/smarttv.png' width=30 height=30>Smart TV Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-}
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/smarttv.png' width=30 height=30>Smart TV Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}}
 else if (preg_match('/CrOS/',$devicefinder[$a])) //chromebook
 {
 //echo "it works!<br>";
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/chromeos.png' width=30 height=30>Chromebook OS device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-}
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/chromeos.png' width=30 height=30>Chromebook OS device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}}
 else //penguin image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/linuxcomputer' width=30 height=30>Linux Debian/Ubuntu OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-}
+if (!empty($single_urls[$a]))
+{
+echo "<tr align='left'><td>$countme</td><td>$thedate[$a]</td><td><img src='images/linuxcomputer' width=30 height=30>Linux Debian/Ubuntu OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+$countme++;
+}}
 
 if ($maliciousscanner==1)
 {
