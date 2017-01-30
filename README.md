@@ -14,3 +14,4 @@ Once the malicious scanning option is enabled, you will notice a new column adde
 easy.  do this: <b>sudo nano maliciousscanning</b> and change the '1' to a '0'.  Do the same for the <b>'refreshornot'</b> file.<br>
 <b>4. How about archiving logs?</b><br>
 This is something I am also currently working on.  Right now TheBriarPatch is more a LIVE logging solution.  It will pull in logs that are currently in the suricata logs directory,http.log, even if suricata isn't running.  That is really the only "archiving" feature enabled right now.<br>
+UPDATE: Archive testing is complete and seems to be cooperating nicely.  will add to repo soon!
