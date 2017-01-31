@@ -8,14 +8,24 @@ header("refresh:3;url=Login.php");
 exit (0);
 }
 ?>
-
+<head>
+	
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
+	<script>
+		$(document).ready(function(){
+    $('#example').DataTable();
+});
+	</script>
+</head>
 <?php
 
 //TheBriarPatch
 //Locates and classifies traffic captured from Suricata and compares with intel logs from Bro
 $tracker="";
 $malicious="";
-//$currentdate=shell_exec('date +"%m/%d/%Y"');
+$currentdate=shell_exec('date +"%m/%d/%Y"');
 $bropid=0;
 $suripid=0;
 $maliciousscanner="";
@@ -107,6 +117,23 @@ $iPhone = shell_exec("grep 'iPhone' /var/log/suricata/http.log | awk '{print $2}
 //Exploit Attempts
 $ExploitAttempts = shell_exec("grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /var/log/suricata/fast.log");
 
+$todaysdate=date("m/d/Y");
+//echo $todaysdate;
+$todayspackets = file_get_contents("/var/log/suricata/http.log");
+preg_match('/[$todaysdate]/',$todayspackets,$matches);
+if ($matches)
+{
+$todayspackets=1;
+}
+else
+{
+$todayspackets="";
+}
+
+//echo "todays packets: ".$todayspackets;
+
+if ($todayspackets != "")
+{
 
 if ($WindowsOS != "")
 {
@@ -126,10 +153,51 @@ echo "<td><img src='images/bug.png' onClick='exploitsubmitter()' class='img1' wi
 }
 if ($ExploitAttempts == "" && $iPhone == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == "")
 {
-echo "<b style='background:orange'>Doesn't look like you have any packets collected from Suricata for analysis yet...</b>";
+echo "<b style='background:orange'>Doesn't look like you have any packets collected from Suricata, old or new, for analysis yet...</b>";
 }
 
+}
+else
+{
+echo "<b style='background:orange'>Doesn't look like you have any LIVE packets for today collected from Suricata for analysis yet...<br>";
+echo "feel free to browse the archived data until LIVE data arrives</b>";
+}
 echo "</tr></table>";
+
+
+
+
+
+
+
+
+$outs=shell_exec("./archives.sh");
+$outs=explode(PHP_EOL,$outs);
+echo "Optional: Browse Archived Logs ";
+//echo "<form name='grabber' id='grabber' method='post' action=''>";
+echo "<input type='hidden' value='blank' name='selecter' id='selecter'>";
+echo '<select id="MySelect" name="MySelect" onChange="collectit()">';
+echo '<option selected disabled>TODAY\'S LOGS [DEFAULT]</option>';
+for ($v=0;$v<count($outs)-1;$v++)
+{
+echo '<option>'.$outs[$v].'</option>';
+}
+echo '</select>';
+//echo '<input type="submit" value="search!">';
+//echo "</form>";
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if (shell_exec("cat refreshornot")==1)
@@ -170,7 +238,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['grabiphone']=="clicked")
 {
 //iPhone devices
 shell_exec("> iPhoneTraffic.txt");
-$output = shell_exec("grep iPhone /var/log/suricata/http.log >> iPhoneTraffic.txt");
+//$output = shell_exec("grep iPhone /var/log/suricata/http.log >> iPhoneTraffic.txt");
+//echo $_POST['selecter'];
+
+if ($_POST['selecter'] == "blank")
+shell_exec("./today.sh iPhone iPhoneTraffic");
+else
+shell_exec("./archiveddata.sh ".$_POST['selecter']." iPhone iPhoneTraffic");
 
 $thedate = shell_exec("awk '/iPhone/{print $1}' iPhoneTraffic.txt");
 $theurl = shell_exec("awk '/iPhone/{print $2}' iPhoneTraffic.txt");
@@ -191,10 +265,17 @@ $eachip2=explode(PHP_EOL,$remoteip);
 $counturls = count($single_urls);
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
+echo "<tbody>";
+}
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
-
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
+echo "<tbody>";
+}
 $brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
 $brodirs=trim($brodirs);
 $brodirs=explode(PHP_EOL,$brodirs);
@@ -259,7 +340,10 @@ $tracker=0;
 
 }
 
-echo "</tr></table>";
+echo "</tr></tbody></table>";
+//echo '<div style="clear: both; margin-bottom: 2000px;">';
+	
+//echo "</div>";
 }
 
 
@@ -273,7 +357,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['windowsmachine']=="clicked")
 {
 //Windows devices
 shell_exec("> WindowsTraffic.txt");
-$output = shell_exec("grep 'Windows NT' /var/log/suricata/http.log >> WindowsTraffic.txt");
+//$output = shell_exec("grep 'Windows NT' /var/log/suricata/http.log >> WindowsTraffic.txt");
+
+if ($_POST['selecter'] == "blank")
+shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
+else
+shell_exec("./archiveddata.sh ".$_POST['selecter']." 'Windows NT' 'WindowsTraffic'");
+
+//shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
 
 $thedate = shell_exec("awk '/Windows NT/{print $1}' WindowsTraffic.txt");
 $theurl = shell_exec("awk '/Windows NT/{print $2}' WindowsTraffic.txt");
@@ -295,11 +386,17 @@ $datecount=count($thedate);
 //$counturls = count($single_urls);
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
+echo "<tbody>";
+}
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
-
-
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
+echo "<tbody>";
+}
 
 $brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
 $brodirs=trim($brodirs);
@@ -408,7 +505,7 @@ echo "</tr></table>";
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filterstrings']))
 {
 //show filtered exploit attempts
-
+//echo "you shouldn't see me!";
 $usersetfilters=$_POST['filterstrings'];
 $pieces = explode(",", $usersetfilters);
 $piececount=count($pieces);
@@ -502,7 +599,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['lennythepenguin']=="clicked"
 {
 //Linux devices
 shell_exec("> LinuxTraffic.txt");
-$output = shell_exec('grep -e "Linux" -e "CrOS" /var/log/suricata/http.log >> LinuxTraffic.txt');
+//$output = shell_exec('grep -e "Linux" -e "CrOS" /var/log/suricata/http.log >> LinuxTraffic.txt');
+
+if ($_POST['selecter'] == "blank")
+shell_exec("./today.sh Linux LinuxTraffic");
+else
+shell_exec("./archiveddata.sh ".$_POST['selecter']." Linux LinuxTraffic");
+
+//shell_exec("./today.sh Linux LinuxTraffic");
 
 $devicefinder=shell_exec("grep -e 'Linux' -e 'CrOS' LinuxTraffic.txt");
 $thedate = shell_exec("awk '{print $1}' LinuxTraffic.txt");
@@ -526,9 +630,17 @@ $countdate=count($thedate);
 
 
 if ($maliciousscanner==1)
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr>";
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
+echo "<tbody>";
+}
 else
-echo "<table cellpadding=10><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr>";
+{
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
+echo "<tbody>";
+}
 
 $brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
 $brodirs=trim($brodirs);
@@ -683,7 +795,13 @@ document.getElementById('logout').value="loggingout";
 document.getElementById('loggy').value="logging out...";
 document.getElementById('getdevice').submit();
 }
-
+function collectit()
+{
+var e = document.getElementById("MySelect");
+//alert(e.options[e.selectedIndex].text);
+document.getElementById("selecter").value=e.options[e.selectedIndex].text;
+//alert(document.getElementById("selecter").value);
+}
 </script>
 
 
