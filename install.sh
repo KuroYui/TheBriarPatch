@@ -69,7 +69,7 @@ echo "granting access to www-data apache user to purge old suricata and bro logs
 #sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/suriretention.sh' /etc/sudoers
 #sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/broretention.sh' /etc/sudoers
 #sudo sed -i -e '$awww-data    ALL=(ALL:ALL) NOPASSWD: /var/www/html/TheBriarPatch/update.sh' /etc/sudoers
-sudo sed -i -e '$awww-data ALL = (root) NOPASSWD: /bin/cp /var/log/suricata/http.log /var/www/html/TheBriarPatch/archiveddata' /etc/sudoers
+#sudo sed -i -e '$awww-data ALL = (root) NOPASSWD: /bin/cp /var/log/suricata/http.log /var/www/html/TheBriarPatch/archiveddata' /etc/sudoers
 sudo sed -i -e '$awww-data ALL = (root) NOPASSWD: /var/www/html/TheBriarPatch/' /etc/sudoers
 
 
