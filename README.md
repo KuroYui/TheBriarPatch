@@ -1,6 +1,7 @@
 # TheBriarPatch
 <center>Beta version has been uploaded!</center> 
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
+<img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/briar2.png?raw=true"><br>
 <b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
 <br>
 I am creating and adding to the WIKI even as I type this.  Stay tuned in for many updates to the WIKI and this github repo!
