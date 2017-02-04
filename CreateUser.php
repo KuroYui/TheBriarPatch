@@ -8,7 +8,9 @@ $newpass=$hashed_value;
 //echo "sha512 hash: ".$newpass."<br>";
 
 $ouruser=$_POST['user'];
+$ouruser=escapeshellarg($ouruser);
 $ourpass=$_POST['passwd'];
+$ourpass=escapeshellarg($ourpass);
 $cat=shell_exec("cat ../../securedfiles/userandpass");
 $cat=trim($cat);
 $needle=0;
@@ -20,6 +22,7 @@ $needle=0;
 //exit(0);
 //}
 $email=$_POST['email'];
+$email=escapeshellarg($email);
 
 $value = explode(":", $cat);
 for ($q=0;$q<count($value);$q++)

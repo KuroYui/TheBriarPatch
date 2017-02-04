@@ -29,7 +29,7 @@ $currentdate=shell_exec('date +"%m/%d/%Y"');
 $bropid=0;
 $suripid=0;
 $maliciousscanner="";
-echo '<form id="getdevice" action="TheBriarPatch.php" method="POST">';
+echo '<form id="getdevice" action="" method="POST">';
 $proclist=shell_exec("ps aux");
 
 $locatebrosuri=explode(PHP_EOL,$proclist);
@@ -186,11 +186,24 @@ echo '</select>';
 //echo '<input type="submit" value="search!">';
 //echo "</form>";
 
+echo "<br>";
+//echo '<form name="gatherer" id="gatherer" method="POST" action="">';
+echo "<input type='hidden' id='obligatory' value='blank' name='obligatory'>";
+echo "<input type='hidden' id='osclicked' value='blank' name='osclicked'>";
+//echo "</form>";
 
 
-
-
-
+//check details information grabber
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['obligatory']) && $_POST['obligatory'] != "blank" && isset($_POST['osclicked']) && $_POST['osclicked'] != "blank")
+{
+echo "<h2>";
+echo "<p align='left' style='position:absolute;width:1000px'><u style='background:green'>Here's some extra info on the entry you just clicked on (actual resources loaded, etc):</u><br>";
+$searchstring=escapeshellarg($_POST['obligatory']);
+$osvalue=escapeshellarg($_POST['osclicked']);
+$moredetails=shell_exec("grep $searchstring $osvalue");
+echo $moredetails."</p><br>";
+echo "</h2>";
+}
 
 
 
@@ -206,7 +219,7 @@ header("Refresh:60");
 }
 
 //logging out???
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['logout']=="loggingout")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['logout']) && $_POST['logout']=="loggingout")
 {
 //session_start();
 setcookie(session_name(), '', 100);
@@ -219,13 +232,13 @@ header("refresh:1;url=Login.php");
 
 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['clearsuricata']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['clearsuricata']) && $_POST['clearsuricata']=="clicked")
 {
 shell_exec("sudo ./suriretention.sh");
 echo "<script>alert('suricata logs have been cleared!');</script>";
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['clearbro']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['clearbro']) && $_POST['clearbro']=="clicked")
 {
 shell_exec("sudo ./broretention.sh");
 echo "<script>alert('bro logs have been cleared!');</script>";
@@ -234,7 +247,7 @@ echo "<script>alert('bro logs have been cleared!');</script>";
 
 //Apple device section
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['grabiphone']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['grabiphone']) && $_POST['grabiphone']=="clicked")
 {
 //iPhone devices
 shell_exec("> iPhoneTraffic.txt");
@@ -244,7 +257,7 @@ shell_exec("> iPhoneTraffic.txt");
 if ($_POST['selecter'] == "blank")
 shell_exec("./today.sh iPhone iPhoneTraffic");
 else
-shell_exec("./archiveddata.sh ".$_POST['selecter']." iPhone iPhoneTraffic");
+shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." iPhone iPhoneTraffic");
 
 $thedate = shell_exec("awk '/iPhone/{print $1}' iPhoneTraffic.txt");
 $theurl = shell_exec("awk '/iPhone/{print $2}' iPhoneTraffic.txt");
@@ -291,7 +304,7 @@ $brodirscount=count($brodirs);
 for ($a=0; $a<$counturls-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
-echo "<tr align=left><td>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 
 if ($maliciousscanner==1)
 {
@@ -353,7 +366,7 @@ echo "</tr></tbody></table>";
 
 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['windowsmachine']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['windowsmachine']) && $_POST['windowsmachine']=="clicked")
 {
 //Windows devices
 shell_exec("> WindowsTraffic.txt");
@@ -362,7 +375,7 @@ shell_exec("> WindowsTraffic.txt");
 if ($_POST['selecter'] == "blank")
 shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
 else
-shell_exec("./archiveddata.sh ".$_POST['selecter']." 'Windows NT' 'WindowsTraffic'");
+shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." 'Windows NT' 'WindowsTraffic'");
 
 //shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
 
@@ -414,7 +427,7 @@ for ($a=0; $a<$datecount-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/windowscomputer' width=30 height=30>Windows OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"WindowsTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/windowscomputer' width=30 height=30>Windows OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 
 if ($maliciousscanner==1)
 {
@@ -475,11 +488,11 @@ echo "</tr></table>";
 
 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['exploity']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['exploity']) && $_POST['exploity']=="clicked")
 {
 //show exploit attempts
 echo "enter filter string here, or multiple strings separated by a comma (up to 7 strings accepted currently)<br>";
-echo "<input type='text' size=150 name='filterstrings'><input type='submit' value='add filter!'>";
+echo "<input type='text' size=150 name='filterstrings' id='filterstrings' value=''><input type='submit' value='add filter!'>";
 
 $theurl = shell_exec("cat /var/log/suricata/fast.log");
 
@@ -502,7 +515,7 @@ echo "</tr></table>";
 
 
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filterstrings']))
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filterstrings']) && $_POST['filterstrings'] != "")
 {
 //show filtered exploit attempts
 //echo "you shouldn't see me!";
@@ -593,9 +606,10 @@ echo "</tr></table>";
 
 
 
+
 //Linux device section
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && $_POST['lennythepenguin']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lennythepenguin']) && $_POST['lennythepenguin']=="clicked")
 {
 //Linux devices
 shell_exec("> LinuxTraffic.txt");
@@ -604,7 +618,7 @@ shell_exec("> LinuxTraffic.txt");
 if ($_POST['selecter'] == "blank")
 shell_exec("./today.sh Linux LinuxTraffic");
 else
-shell_exec("./archiveddata.sh ".$_POST['selecter']." Linux LinuxTraffic");
+shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." Linux LinuxTraffic");
 
 //shell_exec("./today.sh Linux LinuxTraffic");
 
@@ -662,32 +676,32 @@ if (preg_match('/armv7l/',$devicefinder[$a])) //raspberry pi image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 else if (preg_match('/Android/',$devicefinder[$a])) //android image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/android.png' width=30 height=30>Android SmartPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/android.png' width=30 height=30>Android SmartPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 else if (preg_match('/Tizen/',$devicefinder[$a])) //smart tv
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/smarttv.png' width=30 height=30>Smart TV Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/smarttv.png' width=30 height=30>Smart TV Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 else if (preg_match('/CrOS/',$devicefinder[$a])) //chromebook
 {
 //echo "it works!<br>";
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/chromeos.png' width=30 height=30>Chromebook OS device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/chromeos.png' width=30 height=30>Chromebook OS device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 else //penguin image
 {
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align='left'><td>$thedate[$a]</td><td><img src='images/linuxcomputer' width=30 height=30>Linux Debian/Ubuntu OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/linuxcomputer' width=30 height=30>Linux Debian/Ubuntu OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 
 if ($maliciousscanner==1)
@@ -802,6 +816,16 @@ var e = document.getElementById("MySelect");
 document.getElementById("selecter").value=e.options[e.selectedIndex].text;
 //alert(document.getElementById("selecter").value);
 }
+function grabID(myvar,theos) 
+{
+
+	mystr=myvar.innerHTML;
+	ostype=theos;
+	//alert(mystr);
+        document.getElementById('obligatory').value=mystr;
+        document.getElementById('osclicked').value=ostype;
+        //alert(document.getElementById('obligatory').value);
+        document.getElementById('getdevice').submit();
+}
 </script>
-
-
+</form>
