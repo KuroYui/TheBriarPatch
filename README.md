@@ -1,5 +1,6 @@
 # TheBriarPatch
-<center>Beta version has been uploaded!</center> 
+<center>Beta version has been uploaded!</center> <br>
+Please be sure to view the Installation instructions before cloning.  TheBriarPatch needs to be installed in a specific manner until I get things more automated: https://github.com/musicmancorley/TheBriarPatch/wiki/Installation <br>
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
 <img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/briar2.png?raw=true"><br>
 <b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
