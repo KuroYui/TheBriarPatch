@@ -1,10 +1,33 @@
 #!/bin/bash
 
+ls /var/www/html &>/dev/null
+
+if [ "$?" == "2" ]; then
+echo "It doesn't look like apache2 is installed"
+echo "please install that first by issuing sudo apt-get install apache2"
+exit
+fi
+
+ourpath=$(pwd)
+if [ "$ourpath" != "/var/www/html/TheBriarPatch" ]; then
+echo "It doesn't look like you are in the /var/www/html directory."
+echo "please issue the following command to move TheBriarPatch into that directory:"
+echo "mv TheBriarPatch /var/www/html"
+echo "then simply cd into TheBriarPatch"
+exit
+fi
+
+ouruser=$(whoami)
+
+if [ "$ouruser" != "root" ]; then
+echo "please try again running the script with either sudo or as root"
+exit
+fi
 
 echo "***************************************************************************"
 echo "Welcome to the installer for TheBriarPatch to be used with the raspberry PI"
 echo "***************************************************************************"
-echo "run as SUDO or ROOT user!  if not running as SUDO or ROOT user, feel free to hit CONTROL->C and start this script over again"
+echo "Hit [ENTER] to continue"
 read
 
 cd /var/www/html/TheBriarPatch
@@ -43,11 +66,11 @@ read refresh
 echo "Would you like to enable the malicious scanner?  Y or N.  This can be changed later if you like."
 read scanner
 
-if [ "$refresh" == "Y" ]; then
+if [ "$refresh" == "Y" ] || [ "$refresh" == "y" ]; then
 echo "1">refreshornot
 fi
 echo "done."
-if [ "$scanner" == "Y" ]; then
+if [ "$scanner" == "Y" ] || [ "$scanner" == "y" ]; then
 echo "1">maliciousscanner
 fi
 echo "done."
