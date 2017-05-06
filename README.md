@@ -1,19 +1,8 @@
 # TheBriarPatch
-<center>Beta version has been uploaded!</center> <br>
-Please be sure to view the Installation instructions before cloning.  TheBriarPatch needs to be installed in a specific manner until I get things more automated: https://github.com/musicmancorley/TheBriarPatch/wiki/Installation <br>
+
 <img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
 <img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/briar2.png?raw=true"><br>
 <b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
 <br>
 I am creating and adding to the WIKI even as I type this.  Stay tuned in for many updates to the WIKI and this github repo!
-There is much work to be done, but here is the first fruits of TheBriarPatch for your exploration.  I'll try and answer what I am guessing will be common questions about TheBriarPatch below:<br>
-<b>1. What all devices can it log?</b><br>
-As of right now, I have Windows, Apple(iphone only), Linux [Pi (armv7l), ubuntu/debian, smarttv(TIZEN), android(chromebook and mobile).  More to come as I continue developing this solution<br>
-<b>2. What is that malicious scanner option that I noticed in the install script?</b><br>
-Good question.  This will take your suricata http traffic and compare with Bro's intel logs to determine if any of the sites visited were marked as malicious in the Bro Intel feed.  Keep in mind you will need to get some malware feeds pulled into your Intel feed from critical-stack.  I have that info on the BriarIDS wiki.<br>
-Once the malicious scanning option is enabled, you will notice a new column added into the displayed results.  Also keep in mind that if this option is enabled, it can take some time to compare all traffic to bro's intel log but it is a nice reliable way of discovering malicious traffic in a LIVE setting.<br>
-<b>3. If I enabled auto-refresh and malicious scanning in the install script, how can I disable them?</b><br>
-easy.  do this: <b>sudo nano maliciousscanning</b> and change the '1' to a '0'.  Do the same for the <b>'refreshornot'</b> file.<br>
-<b>4. How about archiving logs?</b><br>
-This is something I am also currently working on.  Right now TheBriarPatch is more a LIVE logging solution.  It will pull in logs that are currently in the suricata logs directory,http.log, even if suricata isn't running.  That is really the only "archiving" feature enabled right now.<br>
-<b>UPDATE (1/29/2017): Archive testing is complete and seems to be cooperating nicely.  will add to repo soon!</b>
+There is much work to be done, but here is the first fruits of TheBriarPatch for your exploration.  I'll try and answer what I am guessing will be common questions about TheBriarPatch [**HERE**](https://github.com/musicmancorley/TheBriarPatch/wiki/CommonQuestions)
