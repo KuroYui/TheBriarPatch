@@ -147,4 +147,4 @@ echo "My message" | mail -s test $emailaddr
 
 
 echo "ok, that should do it."
-echo "Now go browse to https://raspberrypi.local/TheBriarPatch.php and explore!"
+echo "Now go browse to https://[your-pi-IP/ or direct link: https://192.168.1.128/TheBriarPatch/Login.php and have fun exploring TheBriarPatch!"
