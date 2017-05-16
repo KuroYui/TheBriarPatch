@@ -110,8 +110,8 @@ $SmartTV = shell_exec("grep 'Tizen' /var/log/suricata/http.log | awk '{print $2}
 $AndroidOS = shell_exec("grep 'Android' /var/log/suricata/http.log | awk '{print $2}'");
 //Armv7l (Raspberry PI OS)
 $RaspberryPIOS = shell_exec("grep 'armv7l' /var/log/suricata/http.log | awk '{print $2}'");
-
-
+//Mac OS
+$MacOS = shell_exec("grep 'Macintosh' /var/log/suricata/http.log | awk '{print $2}'");
 //iPhone
 $iPhone = shell_exec("grep 'iPhone' /var/log/suricata/http.log | awk '{print $2}'");
 //Exploit Attempts
@@ -143,15 +143,15 @@ if ($LinuxOS != "" || $ChromeOS != "" || $SmartTV != "" || $AndroidOS != "" || $
 {
 echo "<td><img src='images/linuxcomputer' onClick='penguinsubmitter()' class='img1' width=75 height=75>"."<br>Linux-based OS</td>";
 }
-if ($iPhone != "")
+if ($MacOS != "" || $iPhone != "")
 {
-echo "<td><img src='images/iphone' onClick='iphonesubmitter()' class='img1' width=75 height=75>"."<br><center>Apple-based OS</center></td>";
+echo "<td><img src='images/MacOSX.png' onClick='iphonesubmitter()' class='img1' width=100 height=75>"."<br><center>Apple-based OS</center></td>";
 }
 if ($ExploitAttempts != "")
 {
 echo "<td><img src='images/bug.png' onClick='exploitsubmitter()' class='img1' width=75 height=75>"."<br><center>Exploit Attempts</center></td>";
 }
-if ($ExploitAttempts == "" && $iPhone == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == "")
+if ($ExploitAttempts == "" && $iPhone == "" && $MacOS == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == "")
 {
 echo "<b style='background:orange'>Doesn't look like you have any packets collected from Suricata, old or new, for analysis yet...</b>";
 }
@@ -255,17 +255,19 @@ shell_exec("> iPhoneTraffic.txt");
 //echo $_POST['selecter'];
 
 if ($_POST['selecter'] == "blank")
-shell_exec("./today.sh iPhone iPhoneTraffic");
+shell_exec("./today.sh Apple iPhoneTraffic");
 else
-shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." iPhone iPhoneTraffic");
+shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." Apple iPhoneTraffic");
 
-$thedate = shell_exec("awk '/iPhone/{print $1}' iPhoneTraffic.txt");
-$theurl = shell_exec("awk '/iPhone/{print $2}' iPhoneTraffic.txt");
+$devicefinder=shell_exec("grep -e 'iPhone' -e 'Macintosh' -e 'iPad' iPhoneTraffic.txt");
+$thedate = shell_exec("awk '{print $1}' iPhoneTraffic.txt");
+$theurl = shell_exec("awk '{print $2}' iPhoneTraffic.txt");
 //$devicetype = shell_exec("awk '/iPhone/{print $9}' iPhoneTraffic.txt");
 //$deviceos = shell_exec("awk '/iPhone/{print $11}' iPhoneTraffic.txt");
 $sourceip = shell_exec("awk '{print $(NF-2)}' iPhoneTraffic.txt");
 $remoteip = shell_exec("awk '{print $(NF)}' iPhoneTraffic.txt");
 
+$devicefinder=explode(PHP_EOL,$devicefinder);
 $single_urls=explode(PHP_EOL,$theurl);
 //$single_urls=array_unique($single_urls, SORT_REGULAR);
 //$device=explode(PHP_EOL,$devicetype);
@@ -304,7 +306,32 @@ $brodirscount=count($brodirs);
 for ($a=0; $a<$counturls-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+
+if (preg_match('/Macintosh/',$devicefinder[$a])) //raspberry pi image
+{
+//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30 height=30>Mac OSX Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else if (preg_match('/iPhone/',$devicefinder[$a])) //raspberry pi image
+{
+//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else if (preg_match('/iPad/',$devicefinder[$a])) //smart tv
+{
+//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/ipad.png' width=30 height=30>iPad Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else
+{
+echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30  height=30>Unknown Apple Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+
+
+
+
+
+
 
 if ($maliciousscanner==1)
 {
