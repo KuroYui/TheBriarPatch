@@ -41,9 +41,9 @@ echo "<br>checking permissions for /var/www/html/TheBriarPatch"
 permcheck=$(ls -g /var/www/html/ | grep TheBriarPatch | awk '{print $3}')
 
 if [ "$permcheck" == "www-data" ]; then
-echo "<br>permissions looks good"
+echo "<br>permissions look good!"
 else
-echo "<br>adjusting permissions"
+echo "<br>adjusting permissions..."
 sudo chown www-data:www-data /var/www/html/TheBriarPatch
 fi
 
