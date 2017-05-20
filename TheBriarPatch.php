@@ -143,7 +143,7 @@ echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>sur
 echo "<input type='button' onClick='surisubmit()' style='font-size:10px' title='clear exploit logs' value='clear old exploit logs' name='suricatalogs' id='suricatalogs'>";
 echo "<input type='button' onClick='brosubmit()' style='font-size:10px' title='clear bro logs' value='clear old bro logs' name='broslogs' id='broslogs'>";
 
-echo "<center><img src='images/briarpatch.png'><br><i style='font-size:14px'>An extremely crude, lightweight Web Frontend for Suricata/Bro to be used with BriarIDS<br>No database installation required!<br><a href='https://www.github.com/musicmancorley/BriarIDS'><b>https://www.github.com/musicmancorley/BriarIDS</a></b></i></center>";
+echo "<center><img src='images/briarpatch.png'><br><i style='font-size:14px'>An extremely crude, lightweight Web Frontend for Suricata/Bro to be used with BriarIDS<br><a href='https://www.github.com/musicmancorley/BriarIDS'><b>https://www.github.com/musicmancorley/BriarIDS</a></b></i></center>";
 
 echo "<input type='hidden' id='grabiphone' name='grabiphone'>";
 echo "<input type='hidden' id='lennythepenguin' name='lennythepenguin'>";
