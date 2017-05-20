@@ -19,7 +19,7 @@ echo "restoring apache config..."
 sudo cp /etc/apache2/sites-available/default-ssl.conf.old /etc/apache2/sites-available/default-ssl.conf #restore apache original config
 echo "cleaning up sendmail..."
 sudo rm -rf /etc/mail/authinfo/ #cleanup sendmail config
-sudo rm -rf /etc/mail/ #cleanup sendmail continued...
+sudo rm /etc/mail/sendmail.mc #cleanup sendmail continued...
 echo "cleaning up hosts entry"
 sed -i '$ d' /etc/hosts #cleanup hosts entry
 
