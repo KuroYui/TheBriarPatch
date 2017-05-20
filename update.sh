@@ -28,3 +28,22 @@ if [ $? != 0 ] ; then
 sudo sed -i -e '$awww-data ALL = (root) NOPASSWD: /var/www/html/TheBriarPatch/' /etc/sudoers
 fi
 
+echo "<br>Checking to see if php sqlite is installed"
+sqlcheck=$(dpkg -s php5-sqlite | grep installed)
+if [ "$sqlcheck" == "Status: install ok installed" ]; then
+echo "<br>php5-sqlite is installed!"
+else
+echo "<br>installing php5-sqlite<br>"
+sudo apt-get install php5-sqlite -y
+fi
+
+echo "<br>checking permissions for /var/www/html/TheBriarPatch"
+permcheck=$(ls -g /var/www/html/ | grep TheBriarPatch | awk '{print $3}')
+
+if [ "$permcheck" == "www-data" ]; then
+echo "<br>permissions looks good"
+else
+echo "<br>adjusting permissions"
+sudo chown www-data:www-data /var/www/html/TheBriarPatch
+fi
+

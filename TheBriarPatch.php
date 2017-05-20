@@ -9,7 +9,6 @@ exit (0);
 }
 ?>
 <head>
-	
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 <link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.13/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.13/js/jquery.dataTables.js"></script>
@@ -21,8 +20,66 @@ exit (0);
 </head>
 <?php
 
+//**********************************************************************************************
 //TheBriarPatch
 //Locates and classifies traffic captured from Suricata and compares with intel logs from Bro
+//**********************************************************************************************
+
+//SQLite3 stuff
+//************************************
+//check for SQLite3 BriarPatch DATABASE and TABLE existence
+//create if not already existing
+//************************************
+
+$DBexists=shell_exec("ls BriarPatch.db 2>&1");
+//echo $DBexists;
+if (strpos($DBexists, 'cannot') !== false)
+{
+    echo "database not created yet...creating now";
+
+//create DB
+$myfile = fopen("BriarPatch.db", "w");
+fwrite($myfile);
+fclose($myfile);
+
+//create table
+class MyDB extends SQLite3
+   {
+      function __construct()
+      {
+         $this->open('BriarPatch.db');
+      }
+   }
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      echo "Opened database successfully\n";
+   }
+
+   $sql =<<<EOF
+      CREATE TABLE EXPLOITS
+      (DATE           TEXT     NOT NULL UNIQUE ON CONFLICT IGNORE,
+      EXPLOIT         TEXT     NOT NULL,
+      SOURCE            TEXT     NOT NULL,
+      DEST       TEXT     NOT NULL);
+EOF;
+
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      echo "Table created successfully\n";
+   }
+   $db->close();
+
+}
+else
+{
+  //echo "database and table configuration are good to go!";
+}
+//************************************************
+
 $tracker="";
 $malicious="";
 $currentdate=shell_exec('date +"%m/%d/%Y"');
@@ -511,122 +568,114 @@ echo "</tr></table>";
 
 
 
-
-
-
+//****************************************
+//EXPLOITS Section
+//****************************************
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['exploity']) && $_POST['exploity']=="clicked")
 {
+
+//**********************
+//Insert current data
+//**********************
+
+  class MyDB extends SQLite3
+   {
+      function __construct()
+      {
+         $this->open('BriarPatch.db');
+      }
+   }
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      echo "Opened database successfully\n";
+   }
+
+
+$UDPdate = shell_exec("grep '{UDP}' /var/log/suricata/fast.log  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
+$UDPtitle = shell_exec("grep '{UDP}' /var/log/suricata/fast.log  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
+$udp_source = shell_exec("grep '{UDP}' /var/log/suricata/fast.log | awk '{print $(NF-2)}'");
+$udp_dest = shell_exec("grep '{UDP}' /var/log/suricata/fast.log | awk '{print $(NF)}'");
+
+
+$TCPdate = shell_exec("grep '{TCP}' /var/log/suricata/fast.log  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
+$TCPtitle = shell_exec("grep '{TCP}' /var/log/suricata/fast.log  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
+$tcp_source = shell_exec("grep '{TCP}' /var/log/suricata/fast.log | awk '{print $(NF-2)}'");
+$tcp_dest = shell_exec("grep '{TCP}' /var/log/suricata/fast.log | awk '{print $(NF)}'");
+
+
+$UDPdateXploded=explode(PHP_EOL,$UDPdate);
+$UDPsploitXploded=explode(PHP_EOL,$UDPtitle);
+$udpsXploded=explode(PHP_EOL,$udp_source);
+$udpdXploded=explode(PHP_EOL,$udp_dest);
+
+$TCPdateXploded=explode(PHP_EOL,$TCPdate);
+$TCPsploitXploded=explode(PHP_EOL,$TCPtitle);
+$tcpsXploded=explode(PHP_EOL,$tcp_source);
+$tcpdXploded=explode(PHP_EOL,$tcp_dest);
+
+
+for ($a=0;$a<count($UDPdateXploded)-1;$a++)
+{
+  $sql ="INSERT INTO EXPLOITS (DATE,EXPLOIT,SOURCE,DEST) VALUES ('$UDPdateXploded[$a]', '$UDPsploitXploded[$a]', '$udpsXploded[$a]', '$udpdXploded[$a]')";
+
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+}
+
+for ($b=0;$b<count($TCPdateXploded)-1;$b++)
+{
+   $sql ="INSERT INTO EXPLOITS (DATE,EXPLOIT,SOURCE,DEST) VALUES ('$TCPdateXploded[$b]', '$TCPsploitXploded[$b]', '$tcpsXploded[$b]', '$tcpdXploded[$b]')";
+   $ret = $db->exec($sql);
+
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+}
+
+
+   $db->close();
+
+
+echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>EXPLOIT ATTEMPT</th><th>Source IP / Port</th><th>Destination IP/Port</th></tr></thead>";
+echo "<tfoot><tr align=left><th>Date</th><th>EXPLOIT ATTEMPT</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
+echo "<tbody>";
+$db = new SQLite3('BriarPatch.db');
+
 //show exploit attempts
-echo "enter filter string here, or multiple strings separated by a comma (up to 7 strings accepted currently)<br>";
-echo "<input type='text' size=150 name='filterstrings' id='filterstrings' value=''><input type='submit' value='add filter!'>";
+//echo "enter filter string here, or multiple strings separated by a comma (up to 7 strings accepted currently)<br>";
+//echo "<input type='text' size=150 name='filterstrings' id='filterstrings' value=''><input type='submit' value='add filter!'>";
 
-$theurl = shell_exec("cat /var/log/suricata/fast.log");
 
-$single_urls=explode(PHP_EOL,$theurl);
-$urlscount=count($single_urls);
+//$theurl = shell_exec("cat /var/log/suricata/fast.log");
+//$single_urls=explode(PHP_EOL,$theurl);
+//$urlscount=count($single_urls);
 
-echo "<table cellpadding=10><tr align=left><th></th><th><center>Exploit Description</center></th></tr>";
 
-for ($a=0; $a<$urlscount-1; $a++)
-{
+//echo "<table cellpadding=10><tr align=left><th></th><th><center>Exploit Attempts</center></th></tr>";
+
+$results = $db->query('SELECT * FROM EXPLOITS');
+while ($row = $results->fetchArray()) {
+    echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50>$row[DATE]</td><td>$row[EXPLOIT]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+}
+//for ($a=0; $a<$urlscount-1; $a++)
+//{
 //if (!preg_match('/FILE store all/',$single_urls[$a]))
-echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-}
+//echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
+//}
 
 
 echo "</tr></table>";
+$db->close();
 }
-
-
-
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['filterstrings']) && $_POST['filterstrings'] != "")
-{
-//show filtered exploit attempts
-//echo "you shouldn't see me!";
-$usersetfilters=$_POST['filterstrings'];
-$pieces = explode(",", $usersetfilters);
-$piececount=count($pieces);
-$theurl = shell_exec("cat /var/log/suricata/fast.log");
-//grep -v '{$_POST['filterstrings']}'"
-
-if ($pieces[0]!="")
-echo "filters applied: ". $piececount;
-else
-echo "filters applied: 0";
-
-$single_urls=explode(PHP_EOL,$theurl);
-$urlscount=count($single_urls);
-
-echo "<table cellpadding=10><tr align=left><th></th></tr>";
-
-
-for ($a=0; $a<$urlscount-1; $a++)
-{
-
-if ($piececount==1 && $pieces[0]!="")
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==2)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==3)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false && strpos($single_urls[$a], $pieces[2]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==4)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false && strpos($single_urls[$a], $pieces[2]) === false  && strpos($single_urls[$a], $pieces[3]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==5)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false && strpos($single_urls[$a], $pieces[2]) === false  && strpos($single_urls[$a], $pieces[3]) === false  && strpos($single_urls[$a], $pieces[4]) === false)
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==6)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false && strpos($single_urls[$a], $pieces[2]) === false && strpos($single_urls[$a], $pieces[3]) === false && strpos($single_urls[$a], $pieces[4]) === false && strpos($single_urls[$a], $pieces[5]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-if ($piececount==7)
-{
-       if (strpos($single_urls[$a], $pieces[0]) === false && strpos($single_urls[$a], $pieces[1]) === false && strpos($single_urls[$a], $pieces[2]) === false && strpos($single_urls[$a], $pieces[3]) === false && strpos($single_urls[$a], $pieces[4]) === false && strpos($single_urls[$a], $pieces[5]) === false && strpos($single_urls[$a], $pieces[6]) === false) //not found
-       {
-       echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-       }
-}
-
-
-
-
-
-}
-echo "</tr></table>";
-
-}
-
-
-
 
 
 
