@@ -698,7 +698,7 @@ shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." Linux Linux
 
 //shell_exec("./today.sh Linux LinuxTraffic");
 
-$devicefinder=shell_exec("grep -e 'Linux' -e 'CrOS' LinuxTraffic.txt");
+$devicefinder=shell_exec("grep -e 'X11;' -e 'CrOS' LinuxTraffic.txt");
 $thedate = shell_exec("awk '{print $1}' LinuxTraffic.txt");
 $theurl = shell_exec("awk '{print $2}' LinuxTraffic.txt");
 //$devicetype = shell_exec("awk '/Linux/{print $8}' LinuxTraffic.txt");
