@@ -1,6 +1,6 @@
 # TheBriarPatch
 
-<img src="https://raw.githubusercontent.com/musicmancorley/TheBriarPatch/master/thebriarpatch.png"><br>
+<img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/thebriarpatch.png?raw=true"><br>
 <img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/briar2.png?raw=true"><br>
 <b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
 <br>
