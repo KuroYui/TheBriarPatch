@@ -41,9 +41,11 @@ if (strpos($DBexists, 'cannot') !== false)
 $myfile = fopen("BriarPatch.db", "w");
 fwrite($myfile);
 fclose($myfile);
+}
 
-//create table
-class MyDB extends SQLite3
+//main class to be used throughout code
+
+   class MyDB extends SQLite3
    {
       function __construct()
       {
@@ -54,8 +56,22 @@ class MyDB extends SQLite3
    if(!$db){
       echo $db->lastErrorMsg();
    } else {
-      echo "Opened database successfully\n";
+  //    echo "Opened database successfully\n";
    }
+
+//perform select query to determine if TABLE exists
+$result = $db->query("select count(*) from sqlite_master where type='table' and name='EXPLOITS';");
+
+$outputs=print_r($result->fetchArray(), true);
+//echo $outputs;
+
+if (strpos($outputs, '[count(*)] => 1') !== false)
+{
+//echo "TABLE exists!";
+}
+else
+{
+        echo "TABLE EXPLOITS does NOT exist...creating now";
 
    $sql =<<<EOF
       CREATE TABLE EXPLOITS
@@ -71,13 +87,10 @@ EOF;
    } else {
       echo "Table created successfully\n";
    }
-   $db->close();
 
 }
-else
-{
-  //echo "database and table configuration are good to go!";
-}
+   $db->close();
+
 //************************************************
 
 $tracker="";
@@ -579,18 +592,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['exploity']) && $_POST[
 //Insert current data
 //**********************
 
-  class MyDB extends SQLite3
-   {
-      function __construct()
-      {
-         $this->open('BriarPatch.db');
-      }
-   }
    $db = new MyDB();
    if(!$db){
       echo $db->lastErrorMsg();
    } else {
-      echo "Opened database successfully\n";
+      //echo "Opened database successfully\n";
    }
 
 
