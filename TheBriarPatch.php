@@ -188,19 +188,36 @@ $iPhone = shell_exec("grep 'iPhone' /var/log/suricata/http.log | awk '{print $2}
 $ExploitAttempts = shell_exec("grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /var/log/suricata/fast.log");
 
 $todaysdate=date("m/d/Y");
-//echo $todaysdate;
-$todayspackets = file_get_contents("/var/log/suricata/http.log");
-preg_match('/[$todaysdate]/',$todayspackets,$matches);
+
+//**********************************
+//using file stream method instead ;)
+//should correct issue:
+//Allowed memory size of 134217728 bytes exhausted
+//php memory allocation issues fix
+//**********************************
+$todayshttplog = fopen("/var/log/suricata/http.log",'r');
+
+while (true) {
+$buffer=fgets($todayshttplog);
+if (!$buffer) {
+break;
+}
+
+preg_match('/[$todaysdate]/',$buffer,$matches);
 if ($matches)
 {
+//var_dump($buffer);
 $todayspackets=1;
 }
 else
 {
 $todayspackets="";
 }
-
 //echo "todays packets: ".$todayspackets;
+}
+//*****************************************
+fclose($todayshttplog);
+
 
 if ($todayspackets != "")
 {
