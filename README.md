@@ -1,8 +1,9 @@
 # TheBriarPatch
 
+A complimentary Log Management Solution for Suricata that works alongside BriarIDS<br>
 <img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/thebriarpatch.png?raw=true"><br>
 <img src="https://github.com/musicmancorley/TheBriarPatch/blob/master/images/BriarPatchLogin.png?raw=true"><br>
-<b>Demo video:</b> https://youtu.be/vzZACYVJA3Y
 <br>
-I am creating and adding to the WIKI even as I type this.  Stay tuned in for many updates to the WIKI and this github repo!
-There is much work to be done, but here is the first fruits of TheBriarPatch for your exploration.  I'll try and answer what I am guessing will be common questions about TheBriarPatch [**HERE**](https://github.com/musicmancorley/TheBriarPatch/wiki/CommonQuestions)
+I'll try and address most of the common questions about TheBriarPatch [**HERE**](https://github.com/musicmancorley/TheBriarPatch/wiki/CommonQuestions)
+
+Please address all other questions to the BriarIDS/BriarPatch Google groups discussion [**HERE**](https://groups.google.com/forum/#!forum/briarids)
