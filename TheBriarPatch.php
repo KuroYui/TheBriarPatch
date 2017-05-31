@@ -25,24 +25,6 @@ exit (0);
 //Locates and classifies traffic captured from Suricata and compares with intel logs from Bro
 //**********************************************************************************************
 
-//SQLite3 stuff
-//************************************
-//check for SQLite3 BriarPatch DATABASE and TABLE existence
-//create if not already existing
-//************************************
-
-$DBexists=shell_exec("ls BriarPatch.db 2>&1");
-//echo $DBexists;
-if (strpos($DBexists, 'cannot') !== false)
-{
-    echo "database not created yet...creating now";
-
-//create DB
-$myfile = fopen("BriarPatch.db", "w");
-fwrite($myfile);
-fclose($myfile);
-}
-
 //main class to be used throughout code
 
    class MyDB extends SQLite3
@@ -52,44 +34,6 @@ fclose($myfile);
          $this->open('BriarPatch.db');
       }
    }
-   $db = new MyDB();
-   if(!$db){
-      echo $db->lastErrorMsg();
-   } else {
-  //    echo "Opened database successfully\n";
-   }
-
-//perform select query to determine if TABLE exists
-$result = $db->query("select count(*) from sqlite_master where type='table' and name='EXPLOITS';");
-
-$outputs=print_r($result->fetchArray(), true);
-//echo $outputs;
-
-if (strpos($outputs, '[count(*)] => 1') !== false)
-{
-//echo "TABLE exists!";
-}
-else
-{
-        echo "TABLE EXPLOITS does NOT exist...creating now";
-
-   $sql =<<<EOF
-      CREATE TABLE EXPLOITS
-      (DATE           TEXT     NOT NULL UNIQUE ON CONFLICT IGNORE,
-      EXPLOIT         TEXT     NOT NULL,
-      SOURCE            TEXT     NOT NULL,
-      DEST       TEXT     NOT NULL);
-EOF;
-
-   $ret = $db->exec($sql);
-   if(!$ret){
-      echo $db->lastErrorMsg();
-   } else {
-      echo "Table created successfully\n";
-   }
-
-}
-   $db->close();
 
 //************************************************
 
@@ -107,55 +51,74 @@ $proccount=count($locatebrosuri);
 for ($i=0;$i<$proccount-1;$i++)
 {
 $surirunning=preg_match("/\/bin\/suricata/",$locatebrosuri[$i]);
-$brorunning=preg_match("/\/bin\/bro/",$locatebrosuri[$i]);
+//$brorunning=preg_match("/\/bin\/bro/",$locatebrosuri[$i]);
 //echo $surirunning."<br>";
 if ($surirunning==1)
 {
 //echo "found suricata process!";
 $suripid=1;
 }
-if ($brorunning==1)
-{
+//deprecated
+//if ($brorunning==1)
+//{
 //echo "found bro process!";
-$bropid=1;
-}
-}
-
-if (shell_exec("cat maliciousscanner")==1)
-{
-$maliciousscanner=1;
+//$bropid=1;
+//}
 }
 
+//DEPRECATED
+//if (shell_exec("cat maliciousscanner")==1)
+//{
+//$maliciousscanner=1;
+//}
 
 
-echo "<i style='font-size:12px'>Logged in as: <b style='background:yellow'>".$_SESSION['authuser']."</i></b><br>";
-echo "<input type='button' onClick='logoutsession()' name='loggy' id='loggy' style='font-size:10px' value='logout'><br>";
-echo "<b style='font-size:11px'><u>TheBriarPatch Status Menu</u><br>";
+echo "<b><i style='font-size:14px;background:white'>Logged in as: </b><b style='background:yellow'>".$_SESSION['authuser']."</i></b><br>";
+echo "<input type='button' onClick='logoutsession()' name='loggy' id='loggy' style='font-size:14px' value='logout'><br>";
+echo "<br><b style='font-size:14px'>&nbsp<u style='background:white'>TheBriarPatch Status Menu</u><br>";
+echo "<fieldset style='width:200px'>";
 
-if ($maliciousscanner==1)
-echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>Malicious scanner is enabled!</p>";
-else
-echo "<p align='left'><img src='images/redx.png' width=15 height=15><b>Malicious scanner is not enabled</p>";
+//DEPRECATED
+//if ($maliciousscanner==1)
+//echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>Malicious scanner is enabled!</p>";
+//else
+//echo "<p align='left'><img src='images/redx.png' width=15 height=15><b>Malicious scanner is not enabled</p>";
 
-if ($bropid!=1)
-{
-echo "<p align='left'><img src='images/redx.png' width=15 height=15><b>bro is not running</p>";
-}
-else
-{
-echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>bro is running!</p>";
-}
+//if ($bropid!=1)
+//{
+//echo "<p align='left'><img src='images/redx.png' width=15 height=15><b>bro is not running</p>";
+//}
+//else
+//{
+//echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>bro is running!</p>";
+//}
 if ($suripid!=1)
 {
-echo "<p align='left'><img src='images/redx.png' width=15 height=15><b>suricata is not running</p>";
+echo "<p align='left'><img src='images/redx.png' width=15 height=15><b style='background:yellow'>suricata is not running</p></b>";
 }
 else
 {
-echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b>suricata is running!</b></p><br>";
+echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b style='background:yellow'>suricata is running!</b></p>";
 }
-echo "<input type='button' onClick='surisubmit()' style='font-size:10px' title='clear exploit logs' value='clear old exploit logs' name='suricatalogs' id='suricatalogs'>";
-echo "<input type='button' onClick='brosubmit()' style='font-size:10px' title='clear bro logs' value='clear old bro logs' name='broslogs' id='broslogs'>";
 
+if (shell_exec("cat refreshornot")==1)
+{
+	echo "<p align='left'><img src='images/greencheck.png' width=15 height=15><b style='background:yellow'>Auto Refresh every 60 seconds</p></b>";
+}
+//show file sizes of logs
+$loglisting=shell_exec("ls -Sahg /var/log/suricata/ | awk '{print $4,$8}' | grep -m 3 -e 'fast.log' -e 'http.log'");
+$loglisting=explode(PHP_EOL,$loglisting);
+echo "<b style='background:white'><u>Top 3 Largest Logs:</b></u>"."<br>";
+foreach ($loglisting as &$value)
+{
+	echo "<b style='background:yellow'>".$value."</b><br>";
+}
+
+//DEPRECATED
+//echo "<input type='button' onClick='surisubmit()' style='font-size:14px' title='clear exploit logs' value='clear old exploit logs' name='suricatalogs' id='suricatalogs'>";
+
+echo "<input type='button' onClick='logrotatesubmit()' style='font-size:14px' title='Rotate Logs (runs daily otherwise)' value='Rotate Logs (runs daily otherwise)' name='logginhelp' id='logginhelp'>";
+echo "</fieldset></b>";
 echo "<center><img src='images/briarpatch.png'><br><i style='font-size:14px'>An extremely crude, lightweight Web Frontend for Suricata/Bro to be used with BriarIDS<br><a href='https://www.github.com/musicmancorley/BriarIDS'><b>https://www.github.com/musicmancorley/BriarIDS</a></b></i></center>";
 
 echo "<input type='hidden' id='grabiphone' name='grabiphone'>";
@@ -163,37 +126,61 @@ echo "<input type='hidden' id='lennythepenguin' name='lennythepenguin'>";
 echo "<input type='hidden' id='exploity' name='exploity'>";
 echo "<input type='hidden' id='windowsmachine' name='windowsmachine'>";
 echo "<input type='hidden' id='clearsuricata' name='clearsuricata'>";
-echo "<input type='hidden' id='clearbro' name='clearbro'>";
+echo "<input type='hidden' id='rotateit' name='rotateit'>";
 echo "<input type='hidden' id='logout' name='logout'>";
 echo "<center><b>Discovered Devices will be displayed automatically below</b><br>";
 
 echo "<table cellpadding='10'><tr>";
 //Windows OS
-$WindowsOS = shell_exec("grep 'Windows NT' /var/log/suricata/http.log | awk '{print $2}'");
+$WindowsOS = shell_exec("grep -m 1 'Windows NT' /var/log/suricata/http.log | awk '{print $2}'");
+//Windows OS Archives
+$WindowsOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'Windows NT' | awk '{print $2}'");
 //Linux OS
-$LinuxOS = shell_exec("grep 'Linux' /var/log/suricata/http.log | awk '{print $2}'");
+$LinuxOS = shell_exec("grep -m 1 'X11' /var/log/suricata/http.log | awk '{print $2}'");
+//Linux OS Archives
+$LinuxOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'X11' | awk '{print $2}'");
 //Chromebook (chrome os)
-$ChromeOS = shell_exec("grep 'CrOS' /var/log/suricata/http.log | awk '{print $2}'");
+$ChromeOS = shell_exec("grep -m 1 'CrOS' /var/log/suricata/http.log | awk '{print $2}'");
+//Chrome OS Archives
+$ChromeOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'CrOS' | awk '{print $2}'");
 //SmartTV (Smart TV)
-$SmartTV = shell_exec("grep 'Tizen' /var/log/suricata/http.log | awk '{print $2}'");
+$SmartTV = shell_exec("grep -m 1 'Tizen' /var/log/suricata/http.log | awk '{print $2}'");
+//SmartTV Archives
+$SmartTVArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'Tizen' | awk '{print $2}'");
 //Android OS (Android)
-$AndroidOS = shell_exec("grep 'Android' /var/log/suricata/http.log | awk '{print $2}'");
+$AndroidOS = shell_exec("grep -m 1 'Android' /var/log/suricata/http.log | awk '{print $2}'");
+//Android OS Archives
+$AndroidOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'Android' | awk '{print $2}'");
 //Armv7l (Raspberry PI OS)
-$RaspberryPIOS = shell_exec("grep 'armv7l' /var/log/suricata/http.log | awk '{print $2}'");
+$RaspberryPIOS = shell_exec("grep -m 1 'armv7l' /var/log/suricata/http.log | awk '{print $2}'");
+//RaspberryPi OS Archives
+$RaspberryPIOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'armv7l' | awk '{print $2}'");
 //Mac OS
-$MacOS = shell_exec("grep 'Macintosh' /var/log/suricata/http.log | awk '{print $2}'");
+$MacOS = shell_exec("grep -m 1 'Macintosh' /var/log/suricata/http.log | awk '{print $2}'");
+//Mac OS Archives
+$MacOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'Macintosh' | awk '{print $2}'");
 //iPhone
-$iPhone = shell_exec("grep 'iPhone' /var/log/suricata/http.log | awk '{print $2}'");
+$iPhone = shell_exec("grep -m 1 'iPhone' /var/log/suricata/http.log | awk '{print $2}'");
+//RaspberryPi OS Archives
+$iPhoneOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'iPhone' | awk '{print $2}'");
+//iPad
+$iPad = shell_exec("grep -m 1 'iPad' /var/log/suricata/http.log | awk '{print $2}'");
+//iPad OS Archives
+$iPadOSArchives=shell_exec("zcat /var/log/suricata/http.log-* 2> /dev/null | grep -m 1 'iPad' | awk '{print $2}'");
 //Exploit Attempts
-$ExploitAttempts = shell_exec("grep -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /var/log/suricata/fast.log");
+$ExploitAttempts = shell_exec("grep -m 1 -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' /var/log/suricata/fast.log");
+//Exploit Attempts Archives
+$ExploitAttemptsArchives = shell_exec("zcat /var/log/suricata/fast.log-* 2> /dev/null | grep -m 1 -E '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'");
 
 $todaysdate=date("m/d/Y");
 
+/*
+//Deprecated
+//echo $todaysdate;
+//$todayspackets = file_get_contents("/var/log/suricata/http.log");
+$todayspackets="";
 //**********************************
-//using file stream method instead ;)
-//should correct issue:
-//Allowed memory size of 134217728 bytes exhausted
-//php memory allocation issues fix
+//use file stream instead ;)
 //**********************************
 $todayshttplog = fopen("/var/log/suricata/http.log",'r');
 
@@ -218,49 +205,46 @@ $todayspackets="";
 //*****************************************
 fclose($todayshttplog);
 
-
 if ($todayspackets != "")
 {
+*/
 
-if ($WindowsOS != "")
+if ($WindowsOS != "" || $WindowsOSArchives != "")
 {
 echo "<td><img src='images/windowscomputer' onClick='windowssubmitter()' class='img1' width=75 height=75>"."<br>Windows-based OS</td>";
 }
-if ($LinuxOS != "" || $ChromeOS != "" || $SmartTV != "" || $AndroidOS != "" || $RaspberryPIOS != "")
+if ($LinuxOS != "" || $ChromeOS != "" || $SmartTV != "" || $AndroidOS != "" || $RaspberryPIOS != "" || $LinuxOSArchives != "" || $ChromeOSArchives != "" || $SmartTVArchives != "" || $AndroidOSArchives != "" || $RaspberryPIOSArchives != "")
 {
 echo "<td><img src='images/linuxcomputer' onClick='penguinsubmitter()' class='img1' width=75 height=75>"."<br>Linux-based OS</td>";
 }
-if ($MacOS != "" || $iPhone != "")
+if ($MacOS != "" || $iPhone != "" || $iPad	!= "" || $MacOSArchives != "" || $iPhoneOSArchives != "" || $iPadOSArchives != "")
 {
 echo "<td><img src='images/MacOSX.png' onClick='iphonesubmitter()' class='img1' width=100 height=75>"."<br><center>Apple-based OS</center></td>";
 }
-if ($ExploitAttempts != "")
+if ($ExploitAttempts != "" || $ExploitAttemptsArchives != "")
 {
 echo "<td><img src='images/bug.png' onClick='exploitsubmitter()' class='img1' width=75 height=75>"."<br><center>Exploit Attempts</center></td>";
 }
-if ($ExploitAttempts == "" && $iPhone == "" && $MacOS == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == "")
+if ($ExploitAttempts == "" && $iPhone == "" && $iPad == "" && $MacOS == "" && $LinuxOS == "" && $WindowsOS == "" && $ChromeOS == "" && $SmartTV == "" && $AndroidOS == "" && $RaspberryPIOS == ""
+ && $WindowsOSArchives == "" && $LinuxOSArchives == "" && $ChromeOSArchives == "" && $SmartTVArchives == "" && $AndroidOSArchives == "" && $RaspberryPIOSArchives == "" && 
+ $MacOSArchives == "" && $iPhoneOSArchives == "" && $iPadOSArchives == "" && $ExploitAttemptsArchives == "")
 {
 echo "<b style='background:orange'>Doesn't look like you have any packets collected from Suricata, old or new, for analysis yet...</b>";
 }
-
-}
-else
-{
-echo "<b style='background:orange'>Doesn't look like you have any LIVE packets for today collected from Suricata for analysis yet...<br>";
-echo "feel free to browse the archived data until LIVE data arrives</b>";
-}
+//else
+//{
+//echo "<b style='background:orange'>Doesn't look like you have any LIVE packets for today collected from Suricata for analysis yet...<br>";
+//echo "feel free to browse the archived data until LIVE data arrives</b>";
+//}
 echo "</tr></table>";
 
-
-
-
-
-
-
+//******************************************************
+//This section checks for archived logs via logrotate.d
+//******************************************************
 
 $outs=shell_exec("./archives.sh");
 $outs=explode(PHP_EOL,$outs);
-echo "Optional: Browse Archived Logs ";
+echo "<b style='background:yellow'>Optional: Browse Archived Logs </b>";
 //echo "<form name='grabber' id='grabber' method='post' action=''>";
 echo "<input type='hidden' value='blank' name='selecter' id='selecter'>";
 echo '<select id="MySelect" name="MySelect" onChange="collectit()">';
@@ -279,8 +263,9 @@ echo "<input type='hidden' id='obligatory' value='blank' name='obligatory'>";
 echo "<input type='hidden' id='osclicked' value='blank' name='osclicked'>";
 //echo "</form>";
 
-
-//check details information grabber
+//*******************************************************************
+//This generates more verbose information after clicking on log entry
+//*******************************************************************
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['obligatory']) && $_POST['obligatory'] != "blank" && isset($_POST['osclicked']) && $_POST['osclicked'] != "blank")
 {
 echo "<h2>";
@@ -291,13 +276,6 @@ $moredetails=shell_exec("grep $searchstring $osvalue");
 echo $moredetails."</p><br>";
 echo "</h2>";
 }
-
-
-
-
-
-
-
 
 
 if (shell_exec("cat refreshornot")==1)
@@ -317,35 +295,50 @@ header("refresh:1;url=Login.php");
 }
 
 
+//DEPRECATED
+//if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['clearsuricata']) && $_POST['clearsuricata']=="clicked")
+//{
+//shell_exec("sudo ./suriretention.sh");
+//echo "<script>alert('suricata exploit logs have been cleared!');</script>";
+//}
 
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['clearsuricata']) && $_POST['clearsuricata']=="clicked")
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rotateit']) && $_POST['rotateit']=="clicked")
 {
-shell_exec("sudo ./suriretention.sh");
-echo "<script>alert('suricata exploit logs have been cleared!');</script>";
+shell_exec("sudo ./rotatelogs.sh");
+echo "<script>alert('logs rotation script has been run!');</script>";
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['clearbro']) && $_POST['clearbro']=="clicked")
-{
-shell_exec("sudo ./broretention.sh");
-echo "<script>alert('bro logs have been cleared!');</script>";
-}
 
 
+
+
+//***********************************************
 //Apple device section
+//***********************************************
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['grabiphone']) && $_POST['grabiphone']=="clicked")
 {
+$archivebit=False;
+$ourdate="";
 //iPhone devices
 shell_exec("> iPhoneTraffic.txt");
 //$output = shell_exec("grep iPhone /var/log/suricata/http.log >> iPhoneTraffic.txt");
 //echo $_POST['selecter'];
 
+//*******************************************************************
+//This section determines if archive data will be pulled or live data
+//*******************************************************************
 if ($_POST['selecter'] == "blank")
+{
 shell_exec("./today.sh Apple iPhoneTraffic");
+}
 else
+{
 shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." Apple iPhoneTraffic");
-
+$ourdate=shell_exec("head -n 1 iPhoneTraffic.txt | awk -F'-' '{print $1}'");
+//echo $ourdate;
+$archivebit=True;
+}
 $devicefinder=shell_exec("grep -e 'iPhone' -e 'Macintosh' -e 'iPad' iPhoneTraffic.txt");
 $thedate = shell_exec("awk '{print $1}' iPhoneTraffic.txt");
 $theurl = shell_exec("awk '{print $2}' iPhoneTraffic.txt");
@@ -366,110 +359,244 @@ $eachip2=explode(PHP_EOL,$remoteip);
 //$devicecount=count($device);
 $counturls = count($single_urls);
 
-if ($maliciousscanner==1)
-{
-echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
-echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
-echo "<tbody>";
-}
-else
-{
-echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
+   
+//********
+//header
+//********
+echo "<table id='example' style='background:none' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
 echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
 echo "<tbody>";
-}
-$brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
-$brodirs=trim($brodirs);
-$brodirs=explode(PHP_EOL,$brodirs);
-$brodirscount=count($brodirs);
-//echo $brodirscount;
-//echo $brodirs[0], $brodirs[1];
 
-//$inteldirs=shell_exec("ls $brodirs[0] | grep intel*");
-//$inteldirs=explode(PHP_EOL,$inteldirs);
-//$inteldirscount=count($inteldirs);
-//$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
-//echo $malicious;
 for ($a=0; $a<$counturls-1; $a++)
 {
 //if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
 
-if (preg_match('/Macintosh/',$devicefinder[$a])) //raspberry pi image
+if (preg_match('/Macintosh/',$devicefinder[$a])) //Mac OSX
 {
+	if ($archivebit!=True)
+	{	
+	$sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Mac OSX Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   
+   }
+   else
+   {
+	   $sql ="INSERT INTO MACINTOSHOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Mac OSX Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30 height=30>Mac OSX Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30 height=30>Mac OSX Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
-else if (preg_match('/iPhone/',$devicefinder[$a])) //raspberry pi image
+else if (preg_match('/iPhone/',$devicefinder[$a])) //iPhone Device
 {
+	if ($archivebit!=True)
+	{	
+	
+	$sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'iPhone Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+$db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   
+   }
+   else
+   {
+	   
+	$sql ="INSERT INTO MACINTOSHOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'iPhone Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+$db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+   
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src=images/iphone width=30 height=30>iPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
-else if (preg_match('/iPad/',$devicefinder[$a])) //smart tv
+else if (preg_match('/iPad/',$devicefinder[$a])) //iPad Device
 {
+	if ($archivebit!=True)
+	{	
+	$sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'iPad Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   
+   }
+   else
+   {
+	   $sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'iPad Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+   
+   
 //if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/ipad.png' width=30 height=30>iPad Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/ipad.png' width=30 height=30>iPad Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 else
 {
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30  height=30>Unknown Apple Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+	if ($archivebit!=True)
+	{
+	$sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Unknown Apple Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+  $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   
+   }
+   else
+   {
+	   $sql ="INSERT INTO MACINTOSHOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Unknown Apple Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+  $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+   
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"iPhoneTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/MacOSX.png' width=30  height=30>Unknown Apple Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
 
+$db->close();
 
-
-
-
-
-
-if ($maliciousscanner==1)
-{
-
-for ($d=0;$d<$brodirscount;$d++)
-{
-
-$inteldirs=shell_exec("ls $brodirs[$d] | grep intel*");
-$inteldirs=trim($inteldirs);
-$inteldirs=explode(PHP_EOL,$inteldirs);
-$inteldirscount=count($inteldirs);
-
-for ($f=0;$f<$inteldirscount;$f++)
-{
-//for debugging purposes only
-//****************************************
-//echo "<br>";
-//echo "searching: ".$brodirs[$d]."<br>";
-//echo "scanning: ".$inteldirs[$f]."<br>";
-//****************************************
-
-//make sure we aren't scanning our own local ip!
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-$malicious=shell_exec("zgrep $single_urls[$a] $brodirs[$d]/$inteldirs[$f]");
-
-if ($malicious != "")
-$tracker=1;
 
 }
-}
 
-//if ($tracker==1 && !preg_match('/192.168.1.128/', $single_urls[$a]))
-if ($tracker==1)
+//***************
+//SELECT QUERY
+//***************
+
+$db = new SQLite3('BriarPatch.db');
+$J=0;
+if ($archivebit==True)
 {
-echo "<td style='background:red'>Potentially malicious!</td>";
-$tracker=0;
+	$ourdate=trim($ourdate);
+	//echo "<br>"."SELECT * FROM MACINTOSHOSARCHIVES WHERE DATE LIKE "."'".$ourdate."%'";
+	$results = $db->query("SELECT * FROM MACINTOSHOSARCHIVES WHERE DATE LIKE "."'".$ourdate."%'");
 }
 else
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<td style='background:green'>Not likely Malicious</td>";
-$tracker=0;
+	$results = $db->query('SELECT * FROM MACINTOSHOS');
 }
+while ($row = $results->fetchArray()) 
+{
 
-}
+	if (preg_match('/Mac/',$row['DEVICETYPE'])) //Mac OSX
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"iPhoneTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/MacOSX.png' width=50 height=50>Macintosh Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else if (preg_match('/iPhone/',$row['DEVICETYPE'])) //iPhone 
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"iPhoneTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/iphone' width=50 height=50>iPhone Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else if (preg_match('/iPad/',$row['DEVICETYPE'])) //iPad
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"iPhoneTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/ipad.png' width=50 height=50>iPad Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else //unknown Apple device
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"iPhoneTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/MacOSX.png' width=50 height=50>Unknown Apple Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
 
+$J=$J+1;
 }
 
 echo "</tr></tbody></table>";
 //echo '<div style="clear: both; margin-bottom: 2000px;">';
-	
+$db->close();	
 //echo "</div>";
 }
 
@@ -477,20 +604,28 @@ echo "</tr></tbody></table>";
 
 
 
-
-
+//**********************
+//Windows Device Section
+//**********************
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['windowsmachine']) && $_POST['windowsmachine']=="clicked")
 {
+$archivebit=False;
+$ourdate="";
 //Windows devices
 shell_exec("> WindowsTraffic.txt");
 //$output = shell_exec("grep 'Windows NT' /var/log/suricata/http.log >> WindowsTraffic.txt");
 
 if ($_POST['selecter'] == "blank")
+{
 shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
+}
 else
+{
 shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." 'Windows NT' 'WindowsTraffic'");
-
+$ourdate=shell_exec("head -n 1 WindowsTraffic.txt | awk -F'-' '{print $1}'");
+$archivebit=True;
+}
 //shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
 
 $thedate = shell_exec("awk '/Windows NT/{print $1}' WindowsTraffic.txt");
@@ -512,84 +647,67 @@ $eachip2=explode(PHP_EOL,$remoteip);
 $datecount=count($thedate);
 //$counturls = count($single_urls);
 
-if ($maliciousscanner==1)
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+
+for ($R=0;$R<$datecount-1;$R++)
 {
-echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
-echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
-echo "<tbody>";
-}
-else
-{
+	if ($archivebit != True)
+	{
+  $sql ="INSERT INTO WINDOWSOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$R]', 'Windows OS Device', '$single_urls[$R]', '$eachip[$R]', '$eachip2[$R]')";
+
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   
+   }
+   else
+   {
+	   $sql ="INSERT INTO WINDOWSOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$R]', 'Windows OS Device', '$single_urls[$R]', '$eachip[$R]', '$eachip2[$R]')";
+
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   
+}	
+$db->close();
+
+//******
+//header
+//******
 echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
 echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
 echo "<tbody>";
-}
 
-$brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
-$brodirs=trim($brodirs);
-$brodirs=explode(PHP_EOL,$brodirs);
-$brodirscount=count($brodirs);
-//echo $brodirscount;
-
-//$inteldirs=shell_exec("ls $brodirs[0] | grep intel*");
-//$inteldirs=explode(PHP_EOL,$inteldirs);
-//$inteldirscount=count($inteldirs);
-//$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
-//echo $malicious;
-
-for ($a=0; $a<$datecount-1; $a++)
+$db = new SQLite3('BriarPatch.db');
+$a=0;
+if ($archivebit == True)
 {
-//if (!preg_match('/192\.168\.1\.\d{1,3}/', $single_urls[$a]))
-
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"WindowsTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/windowscomputer' width=30 height=30>Windows OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
-
-if ($maliciousscanner==1)
-{
-
-for ($d=0;$d<$brodirscount;$d++)
-{
-
-$inteldirs=shell_exec("ls $brodirs[$d] | grep intel*");
-$inteldirs=trim($inteldirs);
-$inteldirs=explode(PHP_EOL,$inteldirs);
-$inteldirscount=count($inteldirs);
-
-for ($f=0;$f<$inteldirscount;$f++)
-{
-//for debugging purposes only
-//****************************************
-//echo "<br>";
-//echo "searching: ".$brodirs[$d]."<br>";
-//echo "scanning: ".$inteldirs[$f]."<br>";
-//****************************************
-
-//make sure we aren't scanning our own local ip!
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-$malicious=shell_exec("zgrep $single_urls[$a] $brodirs[$d]/$inteldirs[$f]");
-
-if ($malicious != "")
-$tracker=1;
-
-}
-}
-
-if ($tracker==1)
-{
-echo "<td style='background:red'>Potentially malicious!</td>";
-$tracker=0;
+$ourdate=trim($ourdate);
+$results = $db->query("SELECT * FROM WINDOWSOSARCHIVES WHERE DATE LIKE "."'".$ourdate."%'");
 }
 else
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<td style='background:green'>Not likely Malicious</td>";
-$tracker=0;
+$results = $db->query('SELECT * FROM WINDOWSOS');
 }
-
-}
-
+while ($row = $results->fetchArray()) {
+    echo "<tr align='left' id='counter$a' onClick='grabID(date$a,\"WindowsTraffic.txt\")'><td id='date$a'>$row[DATE]</td><td><img src='images/windowscomputer' width=50 height=50>$row[DEVICETYPE]</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+$a=$a+1;
 }
 
 echo "</tr></table>";
+$db->close();
 }
 
 
@@ -604,7 +722,10 @@ echo "</tr></table>";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['exploity']) && $_POST['exploity']=="clicked")
 {
-
+$archivebit=False;
+$ourdate="";
+//Exploits cleanup
+shell_exec("> ExploitTraffic.txt");
 //**********************
 //Insert current data
 //**********************
@@ -616,17 +737,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['exploity']) && $_POST[
       //echo "Opened database successfully\n";
    }
 
+if ($_POST['selecter'] != "blank")
+{
+shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." 'Exploits' 'ExploitTraffic'");
+$ourdate=shell_exec("head -n 1 ExploitTraffic.txt | awk -F'-' '{print $1}'");
+$archivebit=True;
+}
+else
+{	
+	shell_exec("./today.sh Exploits ExploitTraffic");
+	$ourdate=shell_exec("head -n 1 ExploitTraffic.txt | awk -F'-' '{print $1}'");
+	$archivebit=False;
+}
 
-$UDPdate = shell_exec("grep '{UDP}' /var/log/suricata/fast.log  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
-$UDPtitle = shell_exec("grep '{UDP}' /var/log/suricata/fast.log  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
-$udp_source = shell_exec("grep '{UDP}' /var/log/suricata/fast.log | awk '{print $(NF-2)}'");
-$udp_dest = shell_exec("grep '{UDP}' /var/log/suricata/fast.log | awk '{print $(NF)}'");
+
+$UDPdate = shell_exec("grep '{UDP}' ExploitTraffic.txt  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
+$UDPtitle = shell_exec("grep '{UDP}' ExploitTraffic.txt  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
+$udp_source = shell_exec("grep '{UDP}' ExploitTraffic.txt | awk '{print $(NF-2)}'");
+$udp_dest = shell_exec("grep '{UDP}' ExploitTraffic.txt | awk '{print $(NF)}'");
 
 
-$TCPdate = shell_exec("grep '{TCP}' /var/log/suricata/fast.log  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
-$TCPtitle = shell_exec("grep '{TCP}' /var/log/suricata/fast.log  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
-$tcp_source = shell_exec("grep '{TCP}' /var/log/suricata/fast.log | awk '{print $(NF-2)}'");
-$tcp_dest = shell_exec("grep '{TCP}' /var/log/suricata/fast.log | awk '{print $(NF)}'");
+$TCPdate = shell_exec("grep '{TCP}' ExploitTraffic.txt  | awk -F']' '{print $1}' | awk -F'[' '{print $1}'");
+$TCPtitle = shell_exec("grep '{TCP}' ExploitTraffic.txt  | awk -F']' '{print $3}' | awk -F'[' '{print $1}'");
+$tcp_source = shell_exec("grep '{TCP}' ExploitTraffic.txt | awk '{print $(NF-2)}'");
+$tcp_dest = shell_exec("grep '{TCP}' ExploitTraffic.txt | awk '{print $(NF)}'");
 
 
 $UDPdateXploded=explode(PHP_EOL,$UDPdate);
@@ -639,6 +773,9 @@ $TCPsploitXploded=explode(PHP_EOL,$TCPtitle);
 $tcpsXploded=explode(PHP_EOL,$tcp_source);
 $tcpdXploded=explode(PHP_EOL,$tcp_dest);
 
+
+if ($archivebit==False)
+{
 
 for ($a=0;$a<count($UDPdateXploded)-1;$a++)
 {
@@ -663,6 +800,35 @@ for ($b=0;$b<count($TCPdateXploded)-1;$b++)
       //echo "Record inserted successfully\n";
    }
 }
+}
+else
+{
+	
+for ($a=0;$a<count($UDPdateXploded)-1;$a++)
+{
+  $sql ="INSERT INTO EXPLOITARCHIVES (DATE,EXPLOIT,SOURCE,DEST) VALUES ('$UDPdateXploded[$a]', '$UDPsploitXploded[$a]', '$udpsXploded[$a]', '$udpdXploded[$a]')";
+
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+}
+
+for ($b=0;$b<count($TCPdateXploded)-1;$b++)
+{
+   $sql ="INSERT INTO EXPLOITARCHIVES (DATE,EXPLOIT,SOURCE,DEST) VALUES ('$TCPdateXploded[$b]', '$TCPsploitXploded[$b]', '$tcpsXploded[$b]', '$tcpdXploded[$b]')";
+   $ret = $db->exec($sql);
+
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+}
+
+}
 
 
    $db->close();
@@ -672,29 +838,20 @@ echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><t
 echo "<tfoot><tr align=left><th>Date</th><th>EXPLOIT ATTEMPT</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
 echo "<tbody>";
 $db = new SQLite3('BriarPatch.db');
+$ourdate=trim($ourdate);
 
-//show exploit attempts
-//echo "enter filter string here, or multiple strings separated by a comma (up to 7 strings accepted currently)<br>";
-//echo "<input type='text' size=150 name='filterstrings' id='filterstrings' value=''><input type='submit' value='add filter!'>";
-
-
-//$theurl = shell_exec("cat /var/log/suricata/fast.log");
-//$single_urls=explode(PHP_EOL,$theurl);
-//$urlscount=count($single_urls);
-
-
-//echo "<table cellpadding=10><tr align=left><th></th><th><center>Exploit Attempts</center></th></tr>";
-
+if ($archivebit==True)
+{
+$results = $db->query("SELECT * FROM EXPLOITARCHIVES WHERE DATE LIKE "."'".$ourdate."%'");
+}
+else
+{
 $results = $db->query('SELECT * FROM EXPLOITS');
+}
+
 while ($row = $results->fetchArray()) {
     echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50>$row[DATE]</td><td>$row[EXPLOIT]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
 }
-//for ($a=0; $a<$urlscount-1; $a++)
-//{
-//if (!preg_match('/FILE store all/',$single_urls[$a]))
-//echo "<tr align='left'><td><img src='images/bug.png' width=50 height=50></td><td>$single_urls[$a]</td>";
-//}
-
 
 echo "</tr></table>";
 $db->close();
@@ -705,23 +862,31 @@ $db->close();
 
 
 
-
+//************************
 //Linux device section
+//************************
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['lennythepenguin']) && $_POST['lennythepenguin']=="clicked")
 {
+$archivebit=False;
+$ourdate="";
 //Linux devices
 shell_exec("> LinuxTraffic.txt");
 //$output = shell_exec('grep -e "Linux" -e "CrOS" /var/log/suricata/http.log >> LinuxTraffic.txt');
 
 if ($_POST['selecter'] == "blank")
+{
 shell_exec("./today.sh Linux LinuxTraffic");
+}
 else
+{
 shell_exec("./archiveddata.sh ".escapeshellarg($_POST['selecter'])." Linux LinuxTraffic");
-
+$ourdate=shell_exec("head -n 1 LinuxTraffic.txt | awk -F'-' '{print $1}'");
+$archivebit=True;
+}
 //shell_exec("./today.sh Linux LinuxTraffic");
 
-$devicefinder=shell_exec("grep -e 'X11;' -e 'CrOS' LinuxTraffic.txt");
+$devicefinder=shell_exec("grep -e 'armv7l' -e 'Android' -e 'Tizen' -e 'X11;' -e 'CrOS' LinuxTraffic.txt");
 $thedate = shell_exec("awk '{print $1}' LinuxTraffic.txt");
 $theurl = shell_exec("awk '{print $2}' LinuxTraffic.txt");
 //$devicetype = shell_exec("awk '/Linux/{print $8}' LinuxTraffic.txt");
@@ -741,115 +906,287 @@ $eachip2=explode(PHP_EOL,$remoteip);
 //$devicecount=count($device);
 $countdate=count($thedate);
 
-
-if ($maliciousscanner==1)
-{
-echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></thead>";
-echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th><th>Malicious?</th></tr></tfoot>";
-echo "<tbody>";
-}
-else
-{
+//***********
+//header
+//***********
 echo "<table id='example' class='display' width='100%' cellspacing='0'><thead><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></thead>";
 echo "<tfoot><tr align=left><th>Date</th><th>DeviceType/OS</th><th>Base URL</th><th>Source IP / Port</th><th>Remote IP/Port</th></tr></tfoot>";
 echo "<tbody>";
-}
 
-$brodirs=shell_exec("ls -d /opt/nsm/bro/logs/*");
-$brodirs=trim($brodirs);
-$brodirs=explode(PHP_EOL,$brodirs);
-$brodirscount=count($brodirs);
-//echo $brodirscount;
-//echo $brodirs[0], $brodirs[1];
 
-//$inteldirs=shell_exec("ls $brodirs[0] | grep intel*");
-//$inteldirs=explode(PHP_EOL,$inteldirs);
-//$inteldirscount=count($inteldirs);
-//$malicious=shell_exec("zgrep airtyrant.com $brodirs[0]/$inteldirs[0]");
-//echo $malicious;
+//***********
+//INSERTS
+//***********
 
 for ($a=0; $a<$countdate-1; $a++)
 {
-//echo $devicefinder[$a]."<br>";
+
 if (preg_match('/armv7l/',$devicefinder[$a])) //raspberry pi image
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+if ($archivebit!=True)
+{	
+	$sql ="INSERT INTO LINUXOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Raspberry Pi Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
-else if (preg_match('/Android/',$devicefinder[$a])) //android image
-{
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
+else
+   {
+	   $sql ="INSERT INTO LINUXOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Raspberry Pi Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
 
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/android.png' width=30 height=30>Android SmartPhone Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
 }
-else if (preg_match('/Tizen/',$devicefinder[$a])) //smart tv
+else if (preg_match('/Android/',$devicefinder[$a])) //Android image
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/smarttv.png' width=30 height=30>Smart TV Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+if ($archivebit!=True)
+{	
+	$sql ="INSERT INTO LINUXOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Android Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
 }
-else if (preg_match('/CrOS/',$devicefinder[$a])) //chromebook
-{
-//echo "it works!<br>";
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
+else
+   {
+	   $sql ="INSERT INTO LINUXOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Android Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
 
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/chromeos.png' width=30 height=30>Chromebook OS device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
 }
-else //penguin image
+else if (preg_match('/Tizen/',$devicefinder[$a])) //SmartTV image
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
 
-echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/linuxcomputer' width=30 height=30>Linux Debian/Ubuntu OS Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+if ($archivebit!=True)
+{	
+	$sql ="INSERT INTO LINUXOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'SmartTV Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else
+   {
+	   $sql ="INSERT INTO LINUXOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'SmartTV Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
+}
+else if (preg_match('/CrOS/',$devicefinder[$a])) //Chromebook image
+{
+
+if ($archivebit!=True)
+{	
+	$sql ="INSERT INTO LINUXOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Chromebook Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else
+   {
+	   $sql ="INSERT INTO LINUXOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Chromebook Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
+
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
 }
 
-if ($maliciousscanner==1)
+else
 {
 
-for ($d=0;$d<$brodirscount;$d++)
-{
+if ($archivebit!=True)
+{	
+	$sql ="INSERT INTO LINUXOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Debian/Ubuntu based Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
 
-$inteldirs=shell_exec("ls $brodirs[$d] | grep intel*");
-$inteldirs=trim($inteldirs);
-$inteldirs=explode(PHP_EOL,$inteldirs);
-$inteldirscount=count($inteldirs);
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+//echo "<tr align=left id='counter$a' onClick='grabID(date$a,\"LinuxTraffic.txt\")'><td id='date$a'>$thedate[$a]</td><td><img src='images/raspberrypi.png' width=30 height=30>Raspberry Pi Device</td><td>$single_urls[$a]</td><td>$eachip[$a]</td><td>$eachip2[$a]</td>";
+}
+else
+   {
+	   $sql ="INSERT INTO LINUXOSARCHIVES (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$a]', 'Debian/Ubuntu based Device', '$single_urls[$a]', '$eachip[$a]', '$eachip2[$a]')";
 
-for ($f=0;$f<$inteldirscount;$f++)
-{
-//for debugging purposes only
-//****************************************
-//echo "<br>";
-//echo "searching: ".$brodirs[$d]."<br>";
-//echo "scanning: ".$inteldirs[$f]."<br>";
-//****************************************
-
-//make sure we aren't scanning our own local ip!
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-$malicious=shell_exec("zgrep $single_urls[$a] $brodirs[$d]/$inteldirs[$f]");
-
-if ($malicious != "")
-$tracker=1;
+   $db = new MyDB();
+   if(!$db){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Opened database successfully\n";
+   }
+   
+   $ret = $db->exec($sql);
+   if(!$ret){
+      echo $db->lastErrorMsg();
+   } else {
+      //echo "Record inserted successfully\n";
+   }
+   }
+   $db->close();
+	
+}
+$db->close();
 
 }
-}
 
-if ($tracker==1)
+//***************
+//SELECT QUERY
+//***************
+
+$db = new SQLite3('BriarPatch.db');
+$J=0;
+if ($archivebit==True)
 {
-echo "<td style='background:red'>Potentially malicious!</td>";
-$tracker=0;
+	$ourdate=trim($ourdate);
+	$results = $db->query("SELECT * FROM LINUXOSARCHIVES WHERE DATE LIKE "."'".$ourdate."%'");
 }
 else
 {
-//if (!preg_match('/192.168.1.128/', $single_urls[$a]))
-echo "<td style='background:green'>Not likely Malicious</td>";
-$tracker=0;
+	$results = $db->query('SELECT * FROM LINUXOS');
+}
+while ($row = $results->fetchArray()) 
+{
+
+	if (preg_match('/Raspberry/',$row['DEVICETYPE'])) //raspberry pi
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"LinuxTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/raspberrypi.png' width=50 height=50>Raspberry Pi Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else if (preg_match('/Android/',$row['DEVICETYPE'])) //Android
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"LinuxTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/android.png' width=50 height=50>Android Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else if (preg_match('/Smart/',$row['DEVICETYPE'])) //SmartTv
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"LinuxTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/smarttv.png' width=50 height=50>Smart TV Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else if (preg_match('/Chromebook/',$row['DEVICETYPE'])) //Chromebook
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"LinuxTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/chromeos.png' width=50 height=50>Chromebook Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+	else //Linux Debian/Ubuntu
+	{
+		echo "<tr align='left' id='counter$J' onClick='grabID(date$J,\"LinuxTraffic.txt\")'><td id='date$J'>$row[DATE]</td><td><img src='images/linuxcomputer' width=50 height=50>Debian/Ubuntu Device</td><td>$row[BASEURL]</td><td>$row[SOURCE]</td><td>$row[DEST]</td>";
+	}
+
+$J=$J+1;
 }
 
-}
-
-}
-
-echo "</tr></table>";
+echo "</tr></tbody></table>";
+//echo '<div style="clear: both; margin-bottom: 2000px;">';
+$db->close();	
+//echo "</div>";
 }
 
 ?>
@@ -858,6 +1195,13 @@ echo "</tr></table>";
 <head></head>
 <style>
 
+html { 
+  background: url(images/rabbit2.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
 
 .img1 {
     border: solid 10px transparent;
@@ -897,9 +1241,10 @@ function surisubmit()
 document.getElementById('clearsuricata').value="clicked";
 document.getElementById('getdevice').submit();
 }
-function brosubmit()
+
+function logrotatesubmit()
 {
-document.getElementById('clearbro').value="clicked";
+document.getElementById('rotateit').value="clicked";
 document.getElementById('getdevice').submit();
 }
 function logoutsession()

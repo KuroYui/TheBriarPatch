@@ -63,15 +63,8 @@ echo -n "BriarPatch:$emailaddr">../../securedfiles/emails
 echo "Would you like to enable automatic refresh every 60 seconds? Please enter Y or N.  This can be changed later if you like."
 read refresh
 
-echo "Would you like to enable the malicious scanner?  Y or N.  This can be changed later if you like."
-read scanner
-
 if [ "$refresh" == "Y" ] || [ "$refresh" == "y" ]; then
 echo "1">refreshornot
-fi
-echo "done."
-if [ "$scanner" == "Y" ] || [ "$scanner" == "y" ]; then
-echo "1">maliciousscanner
 fi
 echo "done."
 

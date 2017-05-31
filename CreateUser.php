@@ -8,7 +8,7 @@ $newpass=$hashed_value;
 //echo "sha512 hash: ".$newpass."<br>";
 
 $ouruser=$_POST['user'];
-$ouruser=escapeshellarg($ouruser);
+//$ouruser=escapeshellarg($ouruser);
 $ourpass=$_POST['passwd'];
 $ourpass=escapeshellarg($ourpass);
 $cat=shell_exec("cat ../../securedfiles/userandpass");
@@ -25,6 +25,8 @@ $email=$_POST['email'];
 $email=escapeshellarg($email);
 
 $value = explode(":", $cat);
+//debugging
+//echo $ouruser."<br>".$value[0];
 for ($q=0;$q<count($value);$q++)
 {
 if ($value[$q] == $ouruser)
@@ -39,13 +41,13 @@ $needle=1;
 
 if ($needle==1)
 {
-echo "User already exists.  Refreshing page in 3 seconds."."<br>";
+echo "<br><b style='background:LawnGreen'>User already exists.  Refreshing page in 3 seconds."."</b><br>";
 session_destroy();
 header("refresh:3;url=CreateUser.php");
 exit(0);
 }
 
-echo "User created successfully! Redirecting you to the Login page in 5 seconds...<br>";
+echo "<br><b style='background:LawnGreen'>User created successfully! Redirecting you to the Login page in 5 seconds...</b><br>";
 shell_exec("echo -n :$ouruser:$newpass>>../../securedfiles/userandpass");
 shell_exec("echo -n :$ouruser:$email>>../../securedfiles/emails");
 session_destroy();
@@ -55,11 +57,22 @@ exit(0);
 }
 
 ?>
-<h3>TheBriarPatch Secure Create User Form</h3>
-<form name="form1" method="post" action="">
+<style>
+
+html { 
+  background: url(images/cloverrabbit.jpg) no-repeat center center fixed; 
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+}
+</style>
+<body><center>
+<h3 style='background:LawnGreen'>TheBriarPatch Secure Create User Form</h3><fieldset>
+<form name="form1" method="post" action=""><b style='background:yellow'>
 Desired Username: <input type="text" name="user" id="user"><br>Desired Password: <input type="password" name="passwd" id="passwd"><br>
-User's email address: <input type="text" name="email" id="email"><br>
+User's email address: <input type="text" name="email" id="email"><br></b>
 <input type="submit" value="create user" name="submitter" id="submitter"><br>
-<a href="Login.php">Click here to return to the login page</a>
+<br><b style='background:LawnGreen'><a href="Login.php">Click here to return to the login page</a></b></center></fieldset>
 </form>
 

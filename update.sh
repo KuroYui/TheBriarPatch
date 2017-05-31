@@ -2,11 +2,11 @@
 echo "Checking for updates..."
 git remote show origin | grep "out of date"
 if [ $? == 0 ] ; then
-   echo "<b style='background:green'>An update is available! Updating now!</b><br>"
+   echo "<br><b style='background:green'>An update is available! Updating now!</b><br>"
    git pull
-   exit
+   #exit
    else
-   echo "<b>All good here.  No updates available at this time</b><br>"
+   echo "<b>All good here.  <br>Either there are no updates available or no internet connection at this time</b><br>"
    fi
 
 ps aux | grep sendmail | grep "accepting connections" &>/dev/nul
@@ -33,7 +33,7 @@ sqlcheck=$(dpkg -s php5-sqlite | grep installed)
 if [ "$sqlcheck" == "Status: install ok installed" ]; then
 echo "<br>php5-sqlite is installed!"
 else
-echo "<br>installing php5-sqlite<br>"
+echo "<br>php5-sqlite not installed...installing now!<br>"
 sudo apt-get install php5-sqlite -y
 fi
 
@@ -47,3 +47,83 @@ echo "<br>adjusting permissions..."
 sudo chown www-data:www-data /var/www/html/TheBriarPatch
 fi
 
+echo "<br>checking permissions for ExploitTraffic.txt / creating if it does not exist"
+exploitcheck=$(ls ExploitTraffic.txt 2>&1 | awk '{print $2}')
+
+if [ "$exploitcheck" != "cannot" ]; then
+echo "<br>file is already created and permissions look good!"
+else
+echo "<br>ExploitTraffic.txt does NOT exist.  Creating it now and adjusting permissions..."
+sudo touch ExploitTraffic.txt
+sudo chown www-data:www-data ExploitTraffic.txt
+fi
+
+echo "<br>Checking to make sure suricata boot file is available"
+suricheck=$(ls startupscan.txt 2>&1 | awk '{print $2}')
+if [ "$suricheck" != "cannot" ]; then
+echo "<br>file is already created and permissions look good!"
+else
+echo "<br>startupscan.txt does NOT exist.  Creating it now and adjusting permissions..."
+sudo touch startupscan.txt
+sudo chown www-data:www-data startupscan.txt
+sudo echo no_interface_defined_yet>> startupscan.txt
+fi
+
+echo "<br>Checking value to see if you would like to run Suricata at boot.</b>"
+bootcheck=$(cat 'startupscan.txt')
+if [ "$bootcheck" != "no_interface_defined_yet" ]; then
+
+#check to see if rc.local entry already exists
+grepper=$(grep suricata /etc/rc.local)
+if [ "$?" == "0" ]; then
+echo "<br><b style='background:DeepSkyBlue'>entry already exists...skipping</b>"
+else 
+echo "<br><b style='background:DeepSkyBlue'>Enabling Suricata to start scanning at bootup on $bootcheck!</b>"
+sudo sed -i -e '$i /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suricata.yaml --af-packet='"$bootcheck &" /etc/rc.local
+fi
+fi
+
+echo "<br><b style='background:DeepSkyBlue'>Checking to make sure manual log rotation script file is available</b>"
+rotatecheck=$(ls rotatelogs.sh 2>&1 | awk '{print $2}')
+if [ "$rotatecheck" == "cannot" ]; then
+echo "<br><b style='background:DeepSkyBlue'>Log rotation script does not exist, creating now...</b>"
+sudo touch rotatelogs.sh
+sudo chown root:root rotatelogs.sh
+sudo echo '#!/bin/bash' >> rotatelogs.sh
+sudo echo logrotate /etc/logrotate.d/suricata >> rotatelogs.sh
+sudo chmod +x rotatelogs.sh
+else
+echo "<br><b style='background:DeepSkyBlue'>Script exists!  skipping...</b>"
+fi
+
+echo "<br><b style='background:DeepSkyBlue'>Checking to make sure automatic daily log rotation script file is available</b>"
+rotatecheck=$(ls /etc/logrotate.d/suricata 2>&1 | awk '{print $2}')
+if [ "$rotatecheck" == "cannot" ]; then
+echo "<br><b style='background:DeepSkyBlue'>Automatic Daily Log rotation script does not exist, creating now...</b>"
+sudo touch /etc/logrotate.d/suricata
+sudo chown root:root /etc/logrotate.d/suricata
+sudo echo '/var/log/suricata/*.log /var/log/suricata/*.json'>>/etc/logrotate.d/suricata
+sudo echo '{'>>/etc/logrotate.d/suricata
+sudo echo 'maxsize 250M'>>/etc/logrotate.d/suricata	
+sudo echo 'daily'>>/etc/logrotate.d/suricata
+sudo echo 'rotate 5'>>/etc/logrotate.d/suricata
+sudo echo 'create'>>/etc/logrotate.d/suricata
+sudo echo 'dateext'>>/etc/logrotate.d/suricata
+sudo echo 'compress'>>/etc/logrotate.d/suricata
+sudo echo '}'>>/etc/logrotate.d/suricata
+else
+echo "<br><b style='background:DeepSkyBlue'>Script exists!  skipping...</b>"
+fi
+
+
+#clean tables
+echo "DELETE FROM MACINTOSHOS; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM LINUXOS; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM WINDOWSOS; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM MACINTOSHOSARCHIVES; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM LINUXOSARCHIVES; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM WINDOWSOSARCHIVES; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM EXPLOITS; VACUUM;" | sqlite3 BriarPatch.db
+echo "DELETE FROM EXPLOITARCHIVES; VACUUM;" | sqlite3 BriarPatch.db
+
+echo "<br><b style='background:yellow'>All checks complete!!!</b><br><br><u><b style='background:DeepSkyBlue'>[IMPORTANT]:</b></u><b style='background:yellow'>If you would like to run Suricata at boot,<br>please add your monitoring interface (Ex: wlan0, eth0) to this file: <u>startupscan.txt</b></u>"
