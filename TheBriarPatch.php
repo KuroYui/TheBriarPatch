@@ -114,6 +114,17 @@ foreach ($loglisting as &$value)
 	echo "<b style='background:yellow'>".$value."</b><br>";
 }
 
+echo "<b style='background:yellow'><u>Log integrity check results:</b></u><br>";
+exec("file --mime-encoding /var/log/suricata/*.log | grep binary",$theoutput,$integrity);
+if ($integrity==1)
+{
+echo "<b style='background:white'>"."Logs look good.  no corruption detected</b>";
+}
+else
+{
+echo "<b style='background:white'>"."Logs appear to be corrupted.  This is often due to unexpected, forced closing of Suricata<br>";
+echo "Recommended Actions: remove all files in /var/log/suricata so Suricata can re-create new copies</b>";
+}
 //DEPRECATED
 //echo "<input type='button' onClick='surisubmit()' style='font-size:14px' title='clear exploit logs' value='clear old exploit logs' name='suricatalogs' id='suricatalogs'>";
 
@@ -304,7 +315,7 @@ header("refresh:1;url=Login.php");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rotateit']) && $_POST['rotateit']=="clicked")
 {
-shell_exec("sudo ./rotatelogs.sh");
+shell_exec("sudo ./rotatelogs.sh > /dev/null 2>/dev/null &");
 echo "<script>alert('logs rotation script has been run!');</script>";
 }
 
@@ -610,6 +621,7 @@ $db->close();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['windowsmachine']) && $_POST['windowsmachine']=="clicked")
 {
+	
 $archivebit=False;
 $ourdate="";
 //Windows devices
@@ -618,6 +630,7 @@ shell_exec("> WindowsTraffic.txt");
 
 if ($_POST['selecter'] == "blank")
 {
+	
 shell_exec("./today.sh 'Windows NT' 'WindowsTraffic'");
 }
 else
@@ -656,8 +669,9 @@ $datecount=count($thedate);
 
 for ($R=0;$R<$datecount-1;$R++)
 {
-	if ($archivebit != True)
+	if ($archivebit == False)
 	{
+		
   $sql ="INSERT INTO WINDOWSOS (DATE,DEVICETYPE,BASEURL,SOURCE,DEST) VALUES ('$thedate[$R]', 'Windows OS Device', '$single_urls[$R]', '$eachip[$R]', '$eachip2[$R]')";
 
    $ret = $db->exec($sql);
