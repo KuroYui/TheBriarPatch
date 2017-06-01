@@ -1,5 +1,6 @@
 #!/bin/bash
 echo "Performing status check for services and permissions..."
+git rm --cached
 git remote show origin | grep "out of date"
 if [ $? == 0 ] ; then
    echo "<br><b style='background:green'>An update is available! Updating now!</b><br>"
