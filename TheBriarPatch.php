@@ -315,11 +315,9 @@ header("refresh:1;url=Login.php");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rotateit']) && $_POST['rotateit']=="clicked")
 {
-shell_exec("sudo ./rotatelogs.sh > /dev/null 2>/dev/null &");
+shell_exec("sudo ./rotatelogsnew.sh > /dev/null 2>/dev/null &");
 echo "<script>alert('logs rotation script has been run!');</script>";
 }
-
-
 
 
 

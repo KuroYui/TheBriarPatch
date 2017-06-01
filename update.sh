@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "Performing status check for services and permissions..."
-git rm --cached
 git remote show origin | grep "out of date"
 if [ $? == 0 ] ; then
    echo "<br><b style='background:green'>An update is available! Updating now!</b><br>"
@@ -101,6 +100,23 @@ thecount=$(wc -l /etc/rc.local | awk '{print $1}')
 count=$((thecount-1))
 sed -i ''$count'i ethtool -K '$bootcheck' tx off rx off sg off gso off gro off 2>/dev/null' /etc/rc.local
 fi
+
+#echo "<br><b style='background:DeepSkyBlue'>Checking to make sure manual log rotation script file is available</b>"
+rotatecheck=$(ls rotatelogs.sh 2>&1 | awk '{print $2}')
+if [ "$rotatecheck" == "cannot" ]; then
+#echo "<br><b style='background:DeepSkyBlue'>Log rotation script does not exist, creating now...</b>"
+sudo touch rotatelogs.sh
+sudo chown root:root rotatelogs.sh
+sudo echo '#!/bin/bash' >> rotatelogs.sh
+sudo echo logrotate /etc/logrotate.d/suricata >> rotatelogs.sh
+sudo chmod +x rotatelogs.sh
+else
+:
+#echo "<br><b style='background:DeepSkyBlue'>Script exists!  skipping...</b>"
+fi
+
+
+
 
 #echo "<br><b style='background:DeepSkyBlue'>Checking to make sure automatic daily log rotation script file is available</b>"
 rotatecheck=$(ls /etc/logrotate.d/suricata 2>&1 | awk '{print $2}')
