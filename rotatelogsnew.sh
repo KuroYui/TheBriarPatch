@@ -8,24 +8,21 @@ logrotate /etc/logrotate.d/suricata
 function myfunc()
 {
 #checks to see if running
-ourcheck=$(sudo ps aux | grep "/opt/suricata/bin/suricata" | awk '{print $11}')
+ourcheck=$(sudo ps aux | grep "/opt/suricata/bin/suricata" | awk '{print $14}' | grep yaml)
 #echo $ourcheck
-if [ "$ourcheck" != "grep" ]; then
+if [ "$?" == "0" ]; then
 echo "Suricata is running. continuing..."
-#locate monitoring interface
-echo "locating monitoring interface"
-monint=$(ps aux | grep -m 1 suricata | awk -F= '{print $NF}')
-#grab PID of suricata
-echo "grabbing PID of suricata instance"
-ourpid=$(ps aux | grep -m 1 suricata | awk '{print $2}')
 #kill suricata
 echo "killing Suricata"
-sudo kill -9 $ourpid
+sudo killall "/opt/suricata/bin/suricata"
 myfunc
 else
-echo "Suricata is NOT running...restarting"
+echo "Suricata is NOT running..."
 echo "Starting suricata back up again"
-echo $monint
+#locating monitoring interface
+monint=$(grep -m 1 in_iface /var/log/suricata/eve.json | awk -F: '{print $6}' | awk -F',' '{print $1}')
+monint=$(echo "$monint" | tr -d '"')
+#echo $monint
 sudo ethtool -K $monint tx off rx off sg off gso off gro off 2>/dev/null
 sudo /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suricata.yaml --af-packet=$monint &
 exit
