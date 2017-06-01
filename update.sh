@@ -90,6 +90,8 @@ fi
 fi
 
 #ethtool entry check
+if [ "$bootcheck" != "no_interface_defined_yet" ]; then
+
 grepper2=$(grep ethtool /etc/rc.local)
 if [ "$?" == "0" ]; then
 :
@@ -99,6 +101,7 @@ echo "<br><b style='background:DeepSkyBlue'>adding ethtool functionality to Suri
 thecount=$(wc -l /etc/rc.local | awk '{print $1}')
 count=$((thecount-1))
 sed -i ''$count'i ethtool -K '$bootcheck' tx off rx off sg off gso off gro off 2>/dev/null' /etc/rc.local
+fi
 fi
 
 #echo "<br><b style='background:DeepSkyBlue'>Checking to make sure manual log rotation script file is available</b>"
