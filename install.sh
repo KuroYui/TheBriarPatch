@@ -68,6 +68,7 @@ echo "1">refreshornot
 fi
 echo "done."
 
+sudo chown www-data:www-data /var/www/html/TheBriarPatch
 sudo chown www-data:www-data ../../securedfiles
 sudo chown www-data:www-data ../../securedfiles/*
 sudo chown www-data:www-data refreshornot
