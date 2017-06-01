@@ -123,7 +123,8 @@ echo "<b style='background:white'>"."Logs look good.  no corruption detected</b>
 else
 {
 echo "<b style='background:white'>"."Logs appear to be corrupted.  This is often due to unexpected, forced closing of Suricata<br>";
-echo "Recommended Actions: remove all files in /var/log/suricata so Suricata can re-create new copies</b>";
+echo "This may also be a false positive.  This message can also appear when logs undergo compression.  Please wait if you recently began rotating logs and see if this message disappears.<br>";
+echo "<u>Recommended Actions:</u> If this message does not disappear, please remove all files in /var/log/suricata so Suricata can re-create new copies</b>";
 }
 //DEPRECATED
 //echo "<input type='button' onClick='surisubmit()' style='font-size:14px' title='clear exploit logs' value='clear old exploit logs' name='suricatalogs' id='suricatalogs'>";
@@ -316,7 +317,7 @@ header("refresh:1;url=Login.php");
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rotateit']) && $_POST['rotateit']=="clicked")
 {
 shell_exec("sudo ./rotatelogsnew.sh > /dev/null 2>/dev/null &");
-echo "<script>alert('logs rotation script has been run!');</script>";
+echo "<script>alert('logs rotation script has been run! Suricata will now be restarted.  It should be ready to go again in about 30-45 seconds');</script>";
 }
 
 
