@@ -39,6 +39,20 @@ echo "<br>php5-sqlite not installed...installing now!<br>"
 sudo apt-get install php5-sqlite -y
 fi
 
+#echo "<br>Checking to see if sqlite3 is installed"
+sqlcheck=$(dpkg -s sqlite3 | grep installed)
+if [ "$sqlcheck" == "Status: install ok installed" ]; then
+:
+#echo "<br>sqlite3 is installed!"
+else
+echo "<br>sqlite3 not installed...installing now!<br>"
+sudo apt-get install sqlite3 -y
+fi
+
+
+
+
+
 #echo "<br>checking permissions for /var/www/html/TheBriarPatch"
 permcheck=$(ls -g /var/www/html/ | grep TheBriarPatch | awk '{print $3}')
 
