@@ -115,7 +115,7 @@ foreach ($loglisting as &$value)
 }
 
 echo "<b style='background:yellow'><u>Log integrity check results:</b></u><br>";
-exec("file --mime-encoding /var/log/suricata/*.log | grep binary",$theoutput,$integrity);
+exec("grep -P '[\x80-\xFF]' /var/log/suricata/*.log",$theoutput,$integrity);
 if ($integrity==1)
 {
 echo "<b style='background:white'>"."Logs look good.  no corruption detected</b>";
@@ -316,8 +316,9 @@ header("refresh:1;url=Login.php");
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['rotateit']) && $_POST['rotateit']=="clicked")
 {
-shell_exec("sudo ./rotatelogsnew.sh > /dev/null 2>/dev/null &");
-echo "<script>alert('logs rotation script has been run! Suricata will now be restarted.  It should be ready to go again in about 30-45 seconds');</script>";
+exec("sudo ./rotatelogsnew.sh > /dev/null &",$logoutput,$errorcode);
+//echo $logoutput[0];
+echo "<script>alert('logs rotation script has been run!');</script>";
 }
 
 

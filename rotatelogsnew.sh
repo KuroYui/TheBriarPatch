@@ -1,7 +1,20 @@
 #!/bin/bash
 
+function checkeve()
+{
+grep -q in_iface /var/log/suricata/eve.json
+if [ $? -eq 1 -o $? -eq 2 ] ; then  
+echo "<br><br><b style='background:LawnGreen'>eve.json does not exist or monitoring interface not added yet.<br>"
+echo "please collect some more packets before running this log rotation script</b>"
+exit
+else
+:
+fi
+}
+
 function rotate()
 {
+sudo killall /opt/suricata/bin/suricata
 logrotate /etc/logrotate.d/suricata
 }
 
@@ -29,5 +42,6 @@ exit
 fi
 }
 
+checkeve
 rotate
 myfunc
