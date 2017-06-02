@@ -4,3 +4,4 @@
 archiveddata/
 *.db
 /rotatelogs.sh
+/BriarPatch.db

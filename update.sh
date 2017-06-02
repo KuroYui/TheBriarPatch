@@ -50,9 +50,6 @@ sudo apt-get install sqlite3 -y
 fi
 
 
-
-
-
 #echo "<br>checking permissions for /var/www/html/TheBriarPatch"
 permcheck=$(ls -g /var/www/html/ | grep TheBriarPatch | awk '{print $3}')
 
@@ -209,4 +206,11 @@ if [ $? != 0 ] ; then
    fi
 
 
-echo "<br><b style='background:yellow'>All checks complete!!!</b><br><br><u><b style='background:DeepSkyBlue'>[IMPORTANT]:</b></u><b style='background:yellow'>If you would like to run Suricata at boot,<br>please add your monitoring interface (Ex: wlan0, eth0) to this file: <u>startupscan.txt</b></u>"
+echo "<br><b style='background:yellow'>All checks complete!!!</b><br><br>"
+
+bootcheck2=$(cat 'startupscan.txt')
+if [ "$bootcheck2" != "no_interface_defined_yet" ]; then
+:
+else
+echo "<u><b style='background:DeepSkyBlue'>[IMPORTANT]:</b></u><b style='background:yellow'>If you would like to run Suricata at boot,<br>please add your monitoring interface (Ex: wlan0, eth0) to this file: <u>startupscan.txt</b></u>"
+fi
