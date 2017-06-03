@@ -12,22 +12,22 @@ function myfunc()
 #locating monitoring interface
 liveip=$(ifconfig | grep "inet addr" | grep -v "127.0.0.1" | awk -F: '{print $2}' | awk '{print $1}')
 #check if mon int is eth0
-ifconfig eth0 | grep $liveip &> /dev/null
+ifconfig eth0 2> /dev/null | grep $liveip
 if [ "$?" != "1" ]; then
 monint=eth0
 else
 #check if mon int is eth1
-ifconfig eth1 | grep $liveip &> /dev/null
+ifconfig eth1 2> /dev/null | grep $liveip
 if [ "$?" != "1" ]; then
 monint=eth1
 else
 #check if mon int is wlan0
-ifconfig wlan0 | grep $liveip &> /dev/null
+ifconfig wlan0 2> /dev/null | grep $liveip
 if [ "$?" != "1" ]; then
 monint=wlan0
 else
 #check if mon int is wlan1
-ifconfig wlan1 | grep $liveip &> /dev/null
+ifconfig wlan1 2> /dev/null | grep $liveip
 if [ "$?" != "1" ]; then
 monint=wlan1
 fi
@@ -44,7 +44,7 @@ if [ "$?" == "0" ]; then
 echo "Suricata is running. continuing..."
 #kill suricata
 echo "killing Suricata"
-sudo killall "/opt/suricata/bin/suricata"
+sudo killall "/opt/suricata/bin/suricata" 2> /dev/null
 myfunc
 else
 echo "Suricata is NOT running..."
