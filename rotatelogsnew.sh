@@ -1,17 +1,5 @@
 #!/bin/bash
 
-function checkeve()
-{
-grep -q in_iface /var/log/suricata/eve.json
-if [ $? -eq 1 -o $? -eq 2 ] ; then  
-echo "<br><br><b style='background:LawnGreen'>eve.json does not exist or monitoring interface not added yet.<br>"
-echo "please collect some more packets before running this log rotation script</b>"
-exit
-else
-:
-fi
-}
-
 function rotate()
 {
 sudo killall /opt/suricata/bin/suricata
@@ -20,6 +8,35 @@ logrotate /etc/logrotate.d/suricata
 
 function myfunc()
 {
+
+#locating monitoring interface
+liveip=$(ifconfig | grep "inet addr" | grep -v "127.0.0.1" | awk -F: '{print $2}' | awk '{print $1}')
+#check if mon int is eth0
+ifconfig eth0 | grep $liveip &> /dev/null
+if [ "$?" != "1" ]; then
+monint=eth0
+else
+#check if mon int is eth1
+ifconfig eth1 | grep $liveip &> /dev/null
+if [ "$?" != "1" ]; then
+monint=eth1
+else
+#check if mon int is wlan0
+ifconfig wlan0 | grep $liveip &> /dev/null
+if [ "$?" != "1" ]; then
+monint=wlan0
+else
+#check if mon int is wlan1
+ifconfig wlan1 | grep $liveip &> /dev/null
+if [ "$?" != "1" ]; then
+monint=wlan1
+fi
+fi
+fi
+fi
+
+echo "setting monitoring int to: $monint"
+
 #checks to see if running
 ourcheck=$(sudo ps aux | grep "/opt/suricata/bin/suricata" | awk '{print $14}' | grep yaml)
 #echo $ourcheck
@@ -32,16 +49,11 @@ myfunc
 else
 echo "Suricata is NOT running..."
 echo "Starting suricata back up again"
-#locating monitoring interface
-monint=$(grep -m 1 in_iface /var/log/suricata/eve.json | awk -F: '{print $6}' | awk -F',' '{print $1}')
-monint=$(echo "$monint" | tr -d '"')
-#echo $monint
 sudo ethtool -K $monint tx off rx off sg off gso off gro off 2>/dev/null
 sudo /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suricata.yaml --af-packet=$monint &
 exit
 fi
 }
 
-checkeve
 rotate
 myfunc
