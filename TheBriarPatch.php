@@ -120,6 +120,10 @@ if ($integrity==1)
 {
 echo "<b style='background:white'>"."Logs look good.  no corruption detected</b>";
 }
+else if ($integrity==2)
+{
+echo "<b style='background:white'>"."No logs to check against just yet... :)</b>";	
+}
 else
 {
 echo "<b style='background:white'>"."Logs appear to be corrupted.  This is often due to unexpected, forced closing of Suricata<br>";
