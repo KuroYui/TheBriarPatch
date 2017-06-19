@@ -44,7 +44,6 @@ clear
 echo "testing for ascii logs in suricata folder instead of binary"
 echo "sometimes an unexpected shutdown can cause logs to get corrupted"
 file --mime-encoding /var/log/suricata/*.log | grep binary
-sleep 3
 if [ "$?" == "1" ]; then
 clear
 echo "logs appear to be in-tact and in ascii formatting"
