@@ -22,6 +22,8 @@ sudo rm -rf /etc/mail/authinfo/ #cleanup sendmail config
 sudo rm /etc/mail/sendmail.mc #cleanup sendmail continued...
 echo "cleaning up hosts entry"
 sed -i '$ d' /etc/hosts #cleanup hosts entry
+echo "cleaning up rc.local entries"
+sed -i '/fi/,/exit/{//!d}' /etc/rc.local
 
 echo "Lastly, you will need to remove TheBriarPatch manually"
 echo "Simply type in: sudo rm -rf /var/www/html/TheBriarPatch"
