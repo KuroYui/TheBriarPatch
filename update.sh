@@ -253,5 +253,5 @@ bootcheck2=$(head -n 1 'startupscan.txt')
 if [ "$bootcheck2" != "no_interface_defined_yet" ]; then
 :
 else
-echo "<u><b style='background:DeepSkyBlue'>[IMPORTANT]:</b></u><b style='background:yellow'>If you would like to run Suricata at boot,<br>please add your monitoring interface (Ex: wlan0, eth0) to this file: <u>startupscan.txt</b></u>"
+echo "<u><b style='background:DeepSkyBlue'>[IMPORTANT]:</b></u><b style='background:yellow'>If you would like to run Suricata at boot,<br>please add your monitoring interface (Ex: wlan0, eth0) to this file: <u>startupscan.txt by replacing the line that reads: no_interface_defined_yet</b></u>"
 fi
