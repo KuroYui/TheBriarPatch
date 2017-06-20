@@ -100,6 +100,39 @@ sudo sed -i -e '$i /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suri
 fi
 fi
 
+#sort of counter-productive, but we neded to adjust the above bootup settings now :)
+
+######################################
+#add support for suricata pid files
+#
+######################################
+
+grep -qF '#pid-file: /var/run/suricata.pid' /opt/suricata/etc/suricata/suricata.yaml
+if [ $? == 0 ] ; then
+   #clear
+   echo "<br><b style='background:DeepSkyBlue'>Uncommenting pid file config...</b>"
+   sudo sed -i "/#pid-file: \/var\/run\/suricata.pid/c\pid-file: \/var\/run\/suricata.pid" /opt/suricata/etc/suricata/suricata.yaml
+   #zenity --info --text="Ok.  TLS_EVENTS rule has been corrected!" &> /dev/null
+sudo sed -i '/console:/{n;s/.*/      enabled: no/}' /opt/suricata/etc/suricata/suricata.yaml
+sudo sed -i '/- file:/{n;s/.*/      enabled: yes/}' /opt/suricata/etc/suricata/suricata.yaml
+sudo sed -i '/- file:/{n;n;n;n;n;s/.*/      enabled: yes/}' /opt/suricata/etc/suricata/suricata.yaml
+else
+:
+#echo "pid file enabled already ;)"
+fi
+
+
+
+
+grepper=$(grep "$bootcheck -D" /etc/rc.local)
+if [ "$?" == "0" ]; then
+:
+else
+sed -i "/$bootcheck"' \&/s/.*/\#run suricata at boot/' /etc/rc.local
+sudo sed -i -e '$i /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suricata.yaml --af-packet='"$bootcheck -D" /etc/rc.local
+fi
+
+
 #ethtool entry check
 if [ "$bootcheck" != "no_interface_defined_yet" ]; then
 
@@ -114,6 +147,15 @@ count=$((thecount-1))
 sed -i ''$count'i ethtool -K '$bootcheck' tx off rx off sg off gso off gro off 2>/dev/null' /etc/rc.local
 fi
 fi
+
+
+ps aux | grep suricata | grep "$bootcheck -D" &>/dev/null
+if [ "$?" == "1" ]; then
+echo "<br><b style='background:orange;font-size:15pt'>[***A reboot is required to finalize new configuration for running suricata in daemon mode<br>Please restart at your earliest convenience. thanks!***]</b>"
+else
+:
+fi
+
 
 #echo "<br><b style='background:DeepSkyBlue'>Checking to make sure manual log rotation script file is available</b>"
 rotatecheck=$(ls rotatelogs.sh 2>&1 | awk '{print $2}')

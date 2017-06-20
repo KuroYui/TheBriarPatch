@@ -4,7 +4,7 @@ echo "packet capture testing utility"
 echo "[ diag test #1 ]"
 echo "please browse to speedtest.net on any device on your network"
 echo "if packet capture is working effectively, you should see the speedtest entry show up below"
-sudo timeout 20 tcpdump -i eth0 | grep "speedtest.net"
+sudo timeout 25 tcpdump -i eth0 | grep "speedtest.net"
 
 if [ "$?" == "0" ]; then
 clear
@@ -23,7 +23,7 @@ echo "hit [enter] when ready"
 read
 clear
 echo "now browse to ipcheck.info on another device on your network"
-sudo timeout 20 tail -f /var/log/suricata/http.log | grep "ipcheck.info"
+sudo timeout 25 tail -f /var/log/suricata/http.log | grep "ipcheck.info"
 
 if [ "$?" == "0" ]; then
 clear
