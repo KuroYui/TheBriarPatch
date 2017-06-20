@@ -122,7 +122,7 @@ else
 fi
 
 if [ "$bootcheck" != "no_interface_defined_yet" ]; then
-grepper=$(grep "$bootcheck" -D /etc/rc.local)
+grepper=$(grep "$bootcheck -D" /etc/rc.local)
 if [ "$?" == "0" ]; then
 :
 else
