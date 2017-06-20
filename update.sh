@@ -86,7 +86,7 @@ sudo echo no_interface_defined_yet>> startupscan.txt
 fi
 
 #echo "<br>Checking value to see if you would like to run Suricata at boot.</b>"
-bootcheck=$(cat 'startupscan.txt')
+bootcheck=$(head -n 1 startupscan.txt | xargs)
 if [ "$bootcheck" != "no_interface_defined_yet" ]; then
 
 #check to see if rc.local entry already exists
@@ -121,15 +121,14 @@ else
 #echo "pid file enabled already ;)"
 fi
 
-
-
-
-grepper=$(grep "$bootcheck -D" /etc/rc.local)
+if [ "$bootcheck" != "no_interface_defined_yet" ]; then
+grepper=$(grep "$bootcheck" -D /etc/rc.local)
 if [ "$?" == "0" ]; then
 :
 else
 sed -i "/$bootcheck"' \&/s/.*/\#run suricata at boot/' /etc/rc.local
 sudo sed -i -e '$i /opt/suricata/bin/suricata -c /opt/suricata/etc/suricata/suricata.yaml --af-packet='"$bootcheck -D" /etc/rc.local
+fi
 fi
 
 
@@ -148,13 +147,13 @@ sed -i ''$count'i ethtool -K '$bootcheck' tx off rx off sg off gso off gro off 2
 fi
 fi
 
-
-ps aux | grep suricata | grep "$bootcheck -D" &>/dev/null
-if [ "$?" == "1" ]; then
-echo "<br><b style='background:orange;font-size:15pt'>[***A reboot is required to finalize new configuration for running suricata in daemon mode<br>Please restart at your earliest convenience. thanks!***]</b>"
-else
-:
-fi
+#echo "$bootcheck"
+#ps aux | grep suricata | grep "$bootcheck -D" &>/dev/null
+#if [ "$?" == "1" ]; then
+#echo "<br><b style='background:orange;font-size:15pt'>[***A reboot is required to finalize new configuration for running suricata in daemon mode<br>Please restart at your earliest convenience. thanks!***]</b>"
+#else
+#:
+#fi
 
 
 #echo "<br><b style='background:DeepSkyBlue'>Checking to make sure manual log rotation script file is available</b>"
@@ -250,7 +249,7 @@ if [ $? != 0 ] ; then
 
 echo "<br><b style='background:yellow'>All checks complete!!!</b><br><br>"
 
-bootcheck2=$(cat 'startupscan.txt')
+bootcheck2=$(head -n 1 'startupscan.txt')
 if [ "$bootcheck2" != "no_interface_defined_yet" ]; then
 :
 else
