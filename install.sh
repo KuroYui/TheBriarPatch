@@ -32,7 +32,7 @@ read
 
 cd /var/www/html/TheBriarPatch
 echo "Grabbin the necessary web and mail resources..."
-sudo apt-get install apache2 php5 php5-sqlite sqlite3 sendmail mailutils sendmail-bin -y
+sudo apt-get install apache2 libapache2-mod-php php7.0 php7.0-sqlite3 sqlite3 sendmail mailutils sendmail-bin -y
 
 clear
 echo "creating necessary BriarPatch resource files"
