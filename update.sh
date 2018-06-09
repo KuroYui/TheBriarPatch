@@ -30,13 +30,13 @@ sudo sed -i -e '$awww-data ALL = (root) NOPASSWD: /var/www/html/TheBriarPatch/' 
 fi
 
 #echo "<br>Checking to see if php sqlite is installed"
-sqlcheck=$(dpkg -s php5-sqlite | grep installed)
+sqlcheck=$(dpkg -s php7.0-sqlite3 | grep installed)
 if [ "$sqlcheck" == "Status: install ok installed" ]; then
 :
-#echo "<br>php5-sqlite is installed!"
+#echo "<br>php7.0-sqlite3 is installed!"
 else
-echo "<br>php5-sqlite not installed...installing now!<br>"
-sudo apt-get install php5-sqlite -y
+echo "<br>php7.0-sqlite3 not installed...installing now!<br>"
+sudo apt-get install php7.0-sqlite3 -y
 fi
 
 #echo "<br>Checking to see if sqlite3 is installed"

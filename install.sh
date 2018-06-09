@@ -31,8 +31,21 @@ echo "Hit [ENTER] to continue"
 read
 
 cd /var/www/html/TheBriarPatch
-echo "Grabbin the necessary web and mail resources..."
+
+echo "Updating and Grabbin the necessary web and mail resources..."
+sudo apt-get update && sudo apt-get upgrade -y
 sudo apt-get install apache2 libapache2-mod-php php7.0 php7.0-sqlite3 sqlite3 sendmail mailutils sendmail-bin -y
+
+if [ "$?" != "0" ]; then
+echo ""
+echo "##############################################################"
+echo ""
+echo "please correct package dependencies before continuing...thanks"
+echo ""
+echo "##############################################################"
+exit
+fi
+
 
 clear
 echo "creating necessary BriarPatch resource files"
@@ -67,6 +80,20 @@ if [ "$refresh" == "Y" ] || [ "$refresh" == "y" ]; then
 echo "1">refreshornot
 fi
 echo "done."
+
+######################################################
+#adding in email notification functionality - 6/9/2018
+######################################################
+
+echo "Would you like to enable email notifications of exploit attempts every hour? Please enter Y or N.  This can be changed later if you like by changing 1$
+read notifications
+
+if [ "$notifications" == "Y" ] || [ "$notifications" == "y" ]; then
+echo 'echo "testing suricata fast attachments" | mail -s "testing attachments" -t' ${emailaddr} '-A /var/log/suricata/fast.log' > /etc/cron.hourly/notificat$
+sudo chmod +x /etc/cron.hourly/notifications.sh
+fi
+echo "done."
+
 
 sudo chown www-data:www-data /var/www/html/TheBriarPatch
 sudo chown www-data:www-data ../../securedfiles
@@ -141,4 +168,4 @@ echo "My message" | mail -s test $emailaddr
 
 
 echo "ok, that should do it."
-echo "Now go browse to https://[your-pi-IP/ or direct link: https://192.168.1.128/TheBriarPatch/Login.php and have fun exploring TheBriarPatch!"
+echo "Now go browse to https://[YOUR-PI-IP]/ or direct link: https://[YOUR-PI-IP]/TheBriarPatch/Login.php and have fun exploring TheBriarPatch!"
