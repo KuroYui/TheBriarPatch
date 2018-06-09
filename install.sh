@@ -89,8 +89,9 @@ echo "Would you like to enable email notifications of exploit attempts every hou
 read notifications
 
 if [ "$notifications" == "Y" ] || [ "$notifications" == "y" ]; then
-echo 'echo "testing suricata fast attachments" | mail -s "testing attachments" -t' ${emailaddr} '-A /var/log/suricata/fast.log' > /etc/cron.hourly/notificat$
-sudo chmod +x /etc/cron.hourly/notifications.sh
+echo '#!/bin/bash' >> /etc/cron.hourly/notifications
+echo 'echo "testing suricata fast attachments" | mail -s "testing attachments" -t' ${emailaddr} '-A /var/log/suricata/fast.log' >> /etc/cron.hourly/notifications
+sudo chmod +x /etc/cron.hourly/notifications
 fi
 echo "done."
 
