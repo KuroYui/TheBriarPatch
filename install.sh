@@ -85,7 +85,7 @@ echo "done."
 #adding in email notification functionality - 6/9/2018
 ######################################################
 
-echo "Would you like to enable email notifications of exploit attempts every hour? Please enter Y or N.  This can be changed later if you like by changing 1$
+echo "Would you like to enable email notifications of exploit attempts every hour? Please enter Y or N."
 read notifications
 
 if [ "$notifications" == "Y" ] || [ "$notifications" == "y" ]; then
